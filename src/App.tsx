@@ -1,59 +1,15 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, Package, Search, BarChart2, ShoppingCart, FileText,
-  ChevronRight, Loader2, CheckCheck, Copy, Target, TrendingUp, RotateCw
+  Loader2, Copy, CheckCheck, RotateCw,
+  AlertCircle, CheckCircle2, Info
 } from 'lucide-react';
 import type { ProductInfo, AIOutput } from './types';
-import { DEFAULT_PRODUCT, DEMO_OUTPUT } from './types';
-import { buildPrompt } from './prompts';
+import { DEMO_PRODUCTS } from './types';
 
 const CHANNELS = ['Takealot', 'Independent Store', 'Both'] as const;
 const TARGET_USERS = ['Home User', 'Small Business', 'Warehouse/Retail', 'All'] as const;
-
-function SectionCard({
-  title,
-  icon,
-  children,
-  defaultOpen = false,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-  defaultOpen?: boolean;
-}) {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center gap-2 px-4 py-3 text-left hover:bg-[#1a1a1a] transition-colors"
-      >
-        <span className="text-orange-500">{icon}</span>
-        <span className="text-sm font-medium text-[#e5e5e5]">{title}</span>
-        <ChevronRight
-          size={14}
-          className={`ml-auto text-[#737373] transition-transform ${open ? 'rotate-90' : ''}`}
-        />
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
-          >
-            <div className="px-4 pb-4 pt-1 border-t border-[#2a2a2a]">
-              {children}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -73,86 +29,261 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
+  score: number;
+  canAnalyze: string[];
+  cannotAnalyze: string[];
+}) {
+  const scoreColor = score >= 70 ? '#22c55e' : score >= 40 ? '#eab308' : '#ef4444';
+  return (
+    <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
+      <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+        <Info size={16} className="text-orange-500" />
+        <span className="text-sm font-medium text-[#e5e5e5]">Data Sufficiency Score</span>
+      </div>
+      <div className="p-4">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="relative w-16 h-16 flex-shrink-0">
+            <svg viewBox="0 0 64 64" className="w-16 h-16 -rotate-90">
+              <circle cx="32" cy="32" r="26" fill="none" stroke="#2a2a2a" strokeWidth="6" />
+              <circle
+                cx="32" cy="32" r="26" fill="none"
+                stroke={scoreColor}
+                strokeWidth="6"
+                strokeDasharray={`${(score / 100) * 163.4} 163.4`}
+                strokeLinecap="round"
+              />
+            </svg>
+            <span className="absolute inset-0 flex items-center justify-center text-sm font-bold" style={{ color: scoreColor }}>
+              {score}
+            </span>
+          </div>
+          <div className="flex-1">
+            <div className="text-xs text-[#737373] mb-2">This assessment is based only on public product information. Backend data (sales, inventory, margin) is not accessed.</div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="flex items-start gap-1.5">
+                <CheckCircle2 size={13} className="text-green-500 mt-0.5 flex-shrink-0" />
+                <span className="text-xs text-[#a3a3a3]">Can be analyzed</span>
+              </div>
+              <div className="flex items-start gap-1.5">
+                <AlertCircle size={13} className="text-red-500 mt-0.5 flex-shrink-0" />
+                <span className="text-xs text-[#a3a3a3]">Cannot be analyzed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <p className="text-xs font-medium text-green-500 mb-1.5">Can Analyze</p>
+            <ul className="space-y-1">
+              {canAnalyze.map((item, i) => (
+                <li key={i} className="flex items-start gap-1.5 text-xs text-[#a3a3a3]">
+                  <span className="text-green-500 mt-0.5">•</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-xs font-medium text-red-500 mb-1.5">Cannot Analyze</p>
+            <ul className="space-y-1">
+              {cannotAnalyze.map((item, i) => (
+                <li key={i} className="flex items-start gap-1.5 text-xs text-[#a3a3a3]">
+                  <span className="text-red-500 mt-0.5">•</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function OutputSection({ output }: { output: AIOutput }) {
   return (
     <div className="space-y-3">
+      {/* Data Sufficiency Score */}
+      <DataSufficiencyCard
+        score={output.dataSufficiencyScore}
+        canAnalyze={output.canAnalyze}
+        cannotAnalyze={output.cannotAnalyze}
+      />
+
+      {/* Product Positioning */}
+      {output.productPositioning && (
+        <div className="border border-[#2a2a2a] rounded-xl p-4 bg-[#141414]">
+          <div className="flex items-center gap-2 mb-2">
+            <FileText size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">Product Positioning</span>
+          </div>
+          <p className="text-sm text-[#a3a3a3] leading-relaxed">{output.productPositioning}</p>
+        </div>
+      )}
+
       {/* Listing Diagnosis */}
-      <SectionCard title="Listing Diagnosis" icon={<FileText size={16} />} defaultOpen>
-        <ul className="space-y-2">
-          {output.listingDiagnosis.map((item, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-[#a3a3a3]">
-              <span className="text-orange-500 mt-0.5">•</span>
-              <span>{item}</span>
-            </li>
-          ))}
-        </ul>
-      </SectionCard>
+      {output.listingDiagnosis.length > 0 && (
+        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <FileText size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">Listing Diagnosis</span>
+          </div>
+          <div className="p-4">
+            <ul className="space-y-2">
+              {output.listingDiagnosis.map((item, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-[#a3a3a3]">
+                  <span className="text-orange-500 mt-0.5 flex-shrink-0">{i + 1}.</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Optimized Title */}
-      <SectionCard title="Optimized Product Title" icon={<Zap size={16} />} defaultOpen>
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-sm text-[#e5e5e5] leading-relaxed">{output.optimizedTitle}</p>
-          <CopyButton text={output.optimizedTitle} />
+      {output.optimizedTitle && (
+        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <Zap size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">Optimized Product Title</span>
+          </div>
+          <div className="p-4 flex items-start justify-between gap-3">
+            <p className="text-sm text-[#e5e5e5] leading-relaxed flex-1">{output.optimizedTitle}</p>
+            <CopyButton text={output.optimizedTitle} />
+          </div>
         </div>
-      </SectionCard>
+      )}
 
       {/* Selling Points */}
-      <SectionCard title="Five Key Selling Points" icon={<Target size={16} />} defaultOpen>
-        <ul className="space-y-2">
-          {output.sellingPoints.map((point, i) => (
-            <li key={i} className="flex items-start gap-2 text-sm text-[#a3a3a3]">
-              <span className="text-orange-500 font-medium min-w-[18px]">{i + 1}.</span>
-              <span>{point}</span>
-            </li>
-          ))}
-        </ul>
-      </SectionCard>
+      {output.sellingPoints.length > 0 && (
+        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <FileText size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">Five Key Selling Points</span>
+          </div>
+          <div className="p-4">
+            <ul className="space-y-2">
+              {output.sellingPoints.map((point, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-[#a3a3a3]">
+                  <span className="text-orange-500 mt-0.5 flex-shrink-0">{i + 1}.</span>
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Bundle */}
-      <SectionCard title="Bundle Recommendation" icon={<ShoppingCart size={16} />}>
-        <div className="space-y-4">
-          {output.bundleRecommendation.map((bundle, i) => (
-            <div key={i} className="border border-[#2a2a2a] rounded-lg p-3 bg-[#1a1a1a]">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-medium text-orange-500">{bundle.name}</h4>
+      {output.bundleRecommendation.length > 0 && (
+        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <ShoppingCart size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">Bundle Recommendation</span>
+          </div>
+          <div className="p-4 space-y-3">
+            {output.bundleRecommendation.map((bundle, i) => (
+              <div key={i} className="border border-[#2a2a2a] rounded-lg p-3 bg-[#1a1a1a]">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-medium text-orange-500">{bundle.name}</h4>
+                </div>
+                <ul className="space-y-1 mb-2">
+                  {bundle.items.map((item, j) => (
+                    <li key={j} className="text-xs text-[#a3a3a3] flex items-center gap-1.5">
+                      <span className="text-[#525252]">•</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-[#737373] italic">{bundle.purpose}</p>
               </div>
-              <ul className="space-y-1 mb-2">
-                {bundle.items.map((item, j) => (
-                  <li key={j} className="text-xs text-[#a3a3a3] flex items-center gap-1.5">
-                    <span className="text-[#525252]">•</span>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <p className="text-xs text-[#737373] italic">{bundle.purpose}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </SectionCard>
+      )}
 
       {/* SEO Keywords */}
-      <SectionCard title="SEO Keywords" icon={<Search size={16} />}>
-        <div className="flex flex-wrap gap-2">
-          {output.seoKeywords.map((kw, i) => (
-            <span key={i} className="text-xs px-2.5 py-1 rounded-full bg-[#1f1f1f] border border-[#2a2a2a] text-[#a3a3a3]">
-              {kw}
-            </span>
-          ))}
+      {output.seoKeywords.length > 0 && (
+        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <Search size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">SEO Keywords</span>
+          </div>
+          <div className="p-4">
+            <div className="flex flex-wrap gap-2">
+              {output.seoKeywords.map((kw, i) => (
+                <span key={i} className="text-xs px-2.5 py-1 rounded-full bg-[#1f1f1f] border border-[#2a2a2a] text-[#a3a3a3]">
+                  {kw}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
-      </SectionCard>
+      )}
+
+      {/* Content Ideas */}
+      {output.contentIdeas.length > 0 && (
+        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <FileText size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">Content Ideas</span>
+          </div>
+          <div className="p-4">
+            <ul className="space-y-2">
+              {output.contentIdeas.map((idea, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-[#a3a3a3]">
+                  <span className="text-orange-500 mt-0.5 flex-shrink-0">{i + 1}.</span>
+                  <span>{idea}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* Data Needed */}
+      {output.dataNeeded.length > 0 && (
+        <div className="border border-orange-500/30 rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <AlertCircle size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">Data Needed for Deeper Analysis</span>
+          </div>
+          <div className="p-4">
+            <ul className="space-y-2">
+              {output.dataNeeded.map((item, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-[#a3a3a3]">
+                  <span className="text-orange-500 mt-0.5 flex-shrink-0">•</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Data Metrics */}
-      <SectionCard title="Data Validation Metrics" icon={<BarChart2 size={16} />}>
-        <div className="space-y-2">
-          {output.dataMetrics.map((m, i) => (
-            <div key={i} className="flex items-center gap-3 text-sm">
-              <div className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0" />
-              <span className="text-[#e5e5e5] font-medium">{m.metric}</span>
-              <span className="text-[#737373] text-xs">— {m.reason}</span>
-            </div>
-          ))}
+      {output.dataMetrics.length > 0 && (
+        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <BarChart2 size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">Data Validation Metrics</span>
+          </div>
+          <div className="p-4 space-y-2">
+            {output.dataMetrics.map((m, i) => (
+              <div key={i} className="flex items-start gap-3 text-sm">
+                <div className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0 mt-1.5" />
+                <div>
+                  <span className="text-[#e5e5e5] font-medium">{m.metric}</span>
+                  <span className="text-[#737373] text-xs ml-2">— {m.reason}</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </SectionCard>
+      )}
     </div>
   );
 }
@@ -160,17 +291,24 @@ function OutputSection({ output }: { output: AIOutput }) {
 function InputPanel({
   product,
   onChange,
-  onGenerate,
+  onAnalyze,
   onDemo,
   loading,
+  demoLoading,
 }: {
   product: ProductInfo;
   onChange: (p: ProductInfo) => void;
-  onGenerate: () => void;
-  onDemo: () => void;
+  onAnalyze: () => void;
+  onDemo: (demo: ProductInfo) => void;
   loading: boolean;
+  demoLoading: string;
 }) {
-  const field = (label: string, key: keyof ProductInfo, placeholder = '', type = 'text') => (
+  const field = (
+    label: string,
+    key: keyof ProductInfo,
+    placeholder = '',
+    type: 'text' | 'textarea' = 'text'
+  ) => (
     <div className="space-y-1.5">
       <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{label}</label>
       {type === 'textarea' ? (
@@ -178,7 +316,7 @@ function InputPanel({
           value={product[key] as string}
           onChange={(e) => onChange({ ...product, [key]: e.target.value })}
           placeholder={placeholder}
-          rows={3}
+          rows={2}
           className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] placeholder-[#525252] resize-none focus:border-orange-500 transition-colors"
         />
       ) : (
@@ -193,27 +331,52 @@ function InputPanel({
     </div>
   );
 
+  // Check which fields are filled
+  const filledCount = [
+    product.productName,
+    product.brand,
+    product.category,
+    product.currentTitle,
+    product.description,
+    product.targetUser,
+  ].filter(Boolean).length;
+
+  const progress = Math.round((filledCount / 6) * 100);
+
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center gap-2 mb-5">
+      <div className="flex items-center gap-2 mb-4">
         <Package size={18} className="text-orange-500" />
         <h2 className="text-sm font-semibold text-[#e5e5e5]">Product Information</h2>
+        <div className="ml-auto flex items-center gap-2">
+          <div className="w-20 h-1.5 bg-[#2a2a2a] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-orange-500 rounded-full transition-all"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <span className="text-xs text-[#737373]">{progress}%</span>
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-4 pr-1">
-        {field('Product Name', 'productName', 'e.g. Niimbot B21 Label Printer')}
+      <div className="flex-1 overflow-y-auto space-y-3 pr-1">
+        {field('Product Name *', 'productName', 'e.g. Niimbot B21 Label Printer')}
         {field('Brand', 'brand', 'e.g. Niimbot')}
         {field('Category', 'category', 'e.g. Business Label Printer')}
-        {field('Price (ZAR)', 'price', 'e.g. 899')}
+        {field('Price (ZAR)', 'price', 'e.g. 899 ZAR')}
+        {field('Current Title', 'currentTitle', 'Paste current product title here')}
+        {field('Description', 'description', 'Product description...', 'textarea')}
+        {field('Current Selling Points', 'currentSellingPoints', 'e.g. Portable, Thermal, Free Tape', 'textarea')}
+        {field('Product URL', 'productUrl', 'https://...')}
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Target Channel</label>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {CHANNELS.map((ch) => (
               <button
                 key={ch}
                 onClick={() => onChange({ ...product, channel: ch })}
-                className={`flex-1 text-xs py-2 rounded-lg border transition-colors ${
+                className={`text-xs py-2 rounded-lg border transition-colors ${
                   product.channel === ch
                     ? 'border-orange-500 bg-orange-500/10 text-orange-500'
                     : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
@@ -227,12 +390,12 @@ function InputPanel({
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Target User</label>
-          <div className="flex gap-2">
+          <div className="grid grid-cols-2 gap-2">
             {TARGET_USERS.map((tu) => (
               <button
                 key={tu}
                 onClick={() => onChange({ ...product, targetUser: tu })}
-                className={`flex-1 text-xs py-2 rounded-lg border transition-colors ${
+                className={`text-xs py-2 rounded-lg border transition-colors ${
                   product.targetUser === tu
                     ? 'border-orange-500 bg-orange-500/10 text-orange-500'
                     : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
@@ -245,50 +408,66 @@ function InputPanel({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Consumable</label>
-          <div className="flex gap-2">
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Product Type</label>
+          <div className="grid grid-cols-2 gap-2">
             {([true, false] as const).map((val) => (
               <button
                 key={String(val)}
                 onClick={() => onChange({ ...product, consumable: val })}
-                className={`flex-1 text-xs py-2 rounded-lg border transition-colors ${
+                className={`text-xs py-2 rounded-lg border transition-colors ${
                   product.consumable === val
                     ? 'border-orange-500 bg-orange-500/10 text-orange-500'
                     : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
                 }`}
               >
-                {val ? 'Yes (Consumable)' : 'No (Hardware)'}
+                {val ? 'Consumable (labels, ink...)' : 'Hardware (device, equipment)'}
               </button>
             ))}
           </div>
         </div>
 
         {field('Related Products', 'relatedProducts', 'e.g. Series B Labels, Transparent Labels', 'textarea')}
+        {field('Review Samples', 'reviewSamples', 'Paste customer reviews here...', 'textarea')}
+
+        {/* Demo Buttons */}
+        <div className="pt-2 border-t border-[#2a2a2a] space-y-2">
+          <p className="text-xs font-medium text-[#737373] uppercase tracking-wide">Load Demo</p>
+          <div className="grid grid-cols-1 gap-2">
+            {DEMO_PRODUCTS.map((demo) => (
+              <button
+                key={demo.name}
+                onClick={() => onDemo(demo.product)}
+                disabled={demoLoading !== ''}
+                className="text-left text-xs py-2 px-3 rounded-lg border border-[#2a2a2a] hover:border-orange-500/50 text-[#a3a3a3] hover:text-orange-500 transition-colors flex items-center gap-2 disabled:opacity-40"
+              >
+                {demoLoading === demo.name ? (
+                  <Loader2 size={12} className="animate-spin" />
+                ) : (
+                  <RotateCw size={12} />
+                )}
+                {demo.name}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className="pt-2 space-y-2">
           <button
-            onClick={onGenerate}
+            onClick={onAnalyze}
             disabled={loading || !product.productName}
             className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
           >
             {loading ? (
               <>
                 <Loader2 size={15} className="animate-spin" />
-                Generating...
+                Analyzing...
               </>
             ) : (
               <>
                 <Zap size={15} />
-                Generate AI Diagnosis
+                Run SKU Diagnosis
               </>
             )}
-          </button>
-          <button
-            onClick={onDemo}
-            className="w-full py-2.5 rounded-xl border border-[#2a2a2a] hover:border-orange-500/50 text-[#a3a3a3] hover:text-orange-500 text-sm flex items-center justify-center gap-2 transition-colors"
-          >
-            <RotateCw size={14} />
-            Load Demo (Niimbot B21)
           </button>
         </div>
       </div>
@@ -297,29 +476,264 @@ function InputPanel({
 }
 
 export default function App() {
-  const [product, setProduct] = useState<ProductInfo>(DEFAULT_PRODUCT);
+  const EMPTY_PRODUCT = (): ProductInfo => ({
+    productName: '', brand: '', category: '', price: '',
+    currentTitle: '', description: '', currentSellingPoints: '',
+    channel: 'Both', targetUser: 'All', consumable: false,
+    relatedProducts: '', reviewSamples: '', productUrl: '',
+  });
+
+  const [product, setProduct] = useState<ProductInfo>(EMPTY_PRODUCT());
   const [output, setOutput] = useState<AIOutput | null>(null);
   const [loading, setLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState('');
   const [showPrompt, setShowPrompt] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleGenerate = () => {
+  const handleDemo = useCallback(async (demoProduct: ProductInfo) => {
+    setDemoLoading(demoProduct.productName);
+    setProduct(demoProduct);
+
+    // Rule-based output for demo (no API call)
+    await new Promise(r => setTimeout(r, 800));
+
+    const isConsumable = demoProduct.consumable;
+    const isLabelPrinter = demoProduct.category.toLowerCase().includes('label printer') || demoProduct.category.toLowerCase().includes('printer');
+    const isBaseus = demoProduct.brand.toLowerCase().includes('baseus');
+    const isBarcode = demoProduct.category.toLowerCase().includes('barcode') || demoProduct.category.toLowerCase().includes('warehouse');
+
+    let demoOutput: AIOutput;
+
+    if (isBarcode) {
+      demoOutput = {
+        status: 'partial',
+        dataSufficiencyScore: 68,
+        canAnalyze: ['Product positioning and target user segments', 'Listing optimization direction', 'Bundle opportunity for B2B buyers'],
+        cannotAnalyze: ['Real sales velocity and turnover rate', 'Profit margin per SKU', 'Customer repurchase rate'],
+        productPositioning: 'Professional-grade equipment targeting warehouse, retail and logistics operations in South Africa, where barcode adoption is growing with e-commerce expansion.',
+        listingDiagnosis: [
+          'Title lacks B2B-specific keywords like "warehouse", "logistics", "retail"',
+          'Selling points do not emphasize durability and high-volume throughput',
+          'Missing compatibility matrix (which POS/warehouse systems work with this device)',
+        ],
+        optimizedTitle: 'Industrial Barcode Printer for Warehouse, Retail & Logistics | High-Speed Thermal Transfer',
+        sellingPoints: [
+          'Prints 4x6 shipping labels at up to 6ips — ideal for high-volume fulfillment centers',
+          'Direct thermal and thermal transfer modes for different label materials',
+          'Compatible with most major shipping platforms and warehouse management systems',
+          'Heavy-duty metal frame built for continuous operation in demanding environments',
+          'USB, Serial, and Ethernet connectivity for flexible system integration',
+        ],
+        bundleRecommendation: [{
+          name: 'Warehouse Starter Bundle',
+          items: ['Industrial Barcode Printer', '4x6 Thermal Labels (1000 rolls)', 'Premium Wax Ribbon', 'Label Design Software'],
+          purpose: 'Reduce first-purchase friction for B2B buyers; software adds perceived value and reduces returns',
+        }],
+        seoKeywords: [
+          'barcode printer south africa',
+          'warehouse label printer',
+          'industrial thermal printer',
+          'shipping label printer',
+          'retail barcode scanner',
+          'logistics labeling solution',
+          '4x6 label printer',
+          'thermal transfer printer',
+        ],
+        contentIdeas: [
+          'How to Choose the Right Barcode Printer for Your South African Warehouse',
+          'Barcode Labeling 101: A Guide for South African Small Businesses',
+          'Top 5 Warehouse Efficiency Upgrades for Under R5,000',
+        ],
+        dataNeeded: ['Monthly sales velocity per SKU', 'Gross margin per product line', 'Return and defect rate by category'],
+        dataMetrics: [
+          { metric: 'B2B Quote Request Rate', reason: 'Tracks B2B channel demand' },
+          { metric: 'Label Volume per Customer', reason: 'Indicates consumable repurchase potential' },
+          { metric: 'Return Rate by Product', reason: 'High return rate signals listing vs reality mismatch' },
+        ],
+      };
+    } else if (isConsumable && !isLabelPrinter) {
+      demoOutput = {
+        status: 'full',
+        dataSufficiencyScore: 82,
+        canAnalyze: ['Repeat purchase potential and LTV', 'Bundle opportunity with compatible hardware', 'SEO keyword and content direction'],
+        cannotAnalyze: ['Actual repurchase rate from CRM data', 'Inventory turnover days', 'Customer acquisition cost per channel'],
+        productPositioning: 'High-utility consumable driving recurring revenue through repeat purchase, targeting small businesses and home users with label printer hardware.',
+        listingDiagnosis: [
+          'Product title does not emphasize compatibility with specific printer models',
+          'No "buy in bulk" or subscription option mentioned',
+          'Missing use-case language for specific industries (e-commerce sellers, retailers)',
+        ],
+        optimizedTitle: 'Niimbot Series B Label Rolls 50x30mm — Compatible with B21/B1/B3S | High-Quality Thermal Labels (White)',
+        sellingPoints: [
+          'Compatible with Niimbot B21, B1, and B3S — no guesswork on which labels to buy',
+          'Premium thermal paper stock — crisp prints, no smudging or fading',
+          'Permanent adhesive holds firmly on most surfaces in South African climate conditions',
+          'Easy-peel backing for fast application in high-volume labeling tasks',
+          'Available in white, transparent, and colored — suit different labeling needs',
+        ],
+        bundleRecommendation: [
+          {
+            name: 'Small Business Label Value Pack',
+            items: ['Niimbot Series B Labels (5 rolls)', 'Cable Labels (1 roll)', 'Transparent Labels (1 roll)'],
+            purpose: 'Increase AOV by 35% vs single-roll purchase; provides variety for different labeling needs',
+          },
+          {
+            name: 'Auto-Replenishment Plan',
+            items: ['Monthly label subscription', '10% off recurring orders', 'Free shipping on all subscriptions'],
+            purpose: 'Lock in recurring revenue and reduce churn — labels are a natural subscription product',
+          },
+        ],
+        seoKeywords: [
+          'niimbot labels south africa',
+          'thermal label rolls 50x30mm',
+          'label printer consumables',
+          'buy labels online south africa',
+          'small business labeling supplies',
+          'label printer paper',
+          'ecommerce shipping labels',
+          'storage organization labels',
+        ],
+        contentIdeas: [
+          'How to Organize Your Small Business Inventory with Thermal Labels',
+          'Top 10 Labeling Mistakes E-commerce Sellers Make (and How to Fix Them)',
+          'Home Organization Hacks: How South African Homeowners Use Label Printers',
+        ],
+        dataNeeded: ['Current monthly reorder rate by customer', 'Average order frequency for consumables', 'Churn rate of customers who only bought consumables once'],
+        dataMetrics: [
+          { metric: 'Repeat Purchase Rate', reason: 'Core health metric for consumable SKUs — should exceed 40% within 90 days' },
+          { metric: 'Consumable/Hardware Ratio', reason: 'High ratio signals strong耗材 ecosystem; low ratio signals hardware-only buyers' },
+          { metric: 'Customer LTV', reason: 'Track LTV by acquisition channel to optimize ad spend' },
+        ],
+      };
+    } else if (isBaseus) {
+      demoOutput = {
+        status: 'partial',
+        dataSufficiencyScore: 65,
+        canAnalyze: ['Product positioning vs competitors', 'Scene-based selling point opportunities', 'Cross-sell and upsell potential'],
+        cannotAnalyze: ['Real market share vs Anker and other competitors', 'Actual conversion rate by traffic source', 'Customer demographic breakdown'],
+        productPositioning: 'Price-competitive 3C accessory targeting value-conscious South African consumers who want reliable performance without paying premium brand prices.',
+        listingDiagnosis: [
+          'Title is purely specs-driven — no emotional hook or use-case scenario',
+          'Selling points compete directly with Anker, Samsung, and other established brands on specs alone',
+          'Missing social proof elements: use context, "ideal for students", "perfect for load-shedding charging needs"',
+        ],
+        optimizedTitle: 'Baseus 20000mAh Power Bank 65W — Fast Charge Laptop & Phone | Portable Charger for South Africa',
+        sellingPoints: [
+          '65W output charges most laptops via USB-C — work from anywhere in South Africa',
+          '20000mAh real capacity — charges iPhone 14 Pro over 4 times or Samsung S23 Ultra over 3 times',
+          'Dual output (USB-C + USB-A) — charge two devices simultaneously',
+          'Built-in LED display shows remaining battery percentage at a glance',
+          'Certified safe — over-charge, over-current, and short-circuit protection',
+        ],
+        bundleRecommendation: [{
+          name: 'Student & Remote Worker Bundle',
+          items: ['Baseus 20000mAh Power Bank', 'USB-C to USB-C Cable (1m)', 'Compact Travel Pouch'],
+          purpose: 'Bundle addresses the "I need everything to charge on the go" pain point — raises AOV by R150-200',
+        }],
+        seoKeywords: [
+          'power bank south africa',
+          '20000mah power bank',
+          'fast charging power bank',
+          'usb c power bank',
+          'laptop charger portable',
+          'load shedding power bank',
+          'south africa electronics',
+          'portable charger travel',
+        ],
+        contentIdeas: [
+          'Best Portable Power Banks for South African Load-Shedding (2025 Guide)',
+          'How to Choose the Right Power Bank for Your Phone, Tablet or Laptop',
+          'Travel Essentials: The Only Power Bank You Need for South African Road Trips',
+        ],
+        dataNeeded: ['Sales rank by category on Takealot', 'Customer review sentiment by feature', 'Traffic source breakdown (organic vs paid vs Takealot internal)'],
+        dataMetrics: [
+          { metric: 'Category Sales Rank', reason: 'Tracks competitive position against Anker and other brands' },
+          { metric: 'Review Sentiment Score', reason: 'Aggregate sentiment from reviews tells you which features resonate' },
+          { metric: 'Add-to-Cart vs Purchase Rate', reason: 'High add-to-cart but low purchase = price or reviews issue' },
+        ],
+      };
+    } else {
+      // Default: Niimbot B21 style
+      demoOutput = {
+        status: 'partial',
+        dataSufficiencyScore: 72,
+        canAnalyze: ['Product positioning for small business and home users', 'Listing optimization direction (title, bullet points)', 'Bundle and accessory cross-sell opportunity'],
+        cannotAnalyze: ['Real click-through rate and conversion rate', 'Customer purchase journey and drop-off points', 'Inventory turnover and stockout frequency'],
+        productPositioning: 'Versatile portable label printer for South African small businesses, home organizers, and retailers — differentiating on portability, ease of use, and no-ink convenience.',
+        listingDiagnosis: [
+          'Title focuses on specs ("portable") but misses the use-case ("small business labeling", "home organization")',
+          'Selling points are generic thermal printer benefits, not South African-specific use cases',
+          'Missing social proof — number of happy customers, compatible label range, print speed benchmarks',
+        ],
+        optimizedTitle: 'Niimbot B21 Portable Label Printer — Perfect for Small Business, Home & Retail Labeling | Bluetooth, No Ink Required',
+        sellingPoints: [
+          'Prints professional-quality labels at home, in-store, or in-warehouse — no ink or toner needed',
+          'Bluetooth connectivity — set up in 3 minutes, works directly from your phone or laptop',
+          'Compatible with Niimbot B-series labels in multiple sizes — 40x30mm, 50x30mm, and custom sizes',
+          'Lightweight (190g) and portable — take it to markets, pop-up shops, or around the warehouse',
+          'Free Niimbot app with 100+ label templates — designed for South African small business owners',
+        ],
+        bundleRecommendation: [
+          {
+            name: 'Small Business Starter Kit',
+            items: ['Niimbot B21 Printer', 'Series B Labels (2 rolls: 50x30mm)', 'Transparent Labels (1 roll)', 'Cable Labels (1 roll)'],
+            purpose: 'Raise AOV by R150-250 and reduce first-time buyer friction — everything needed to start labeling immediately',
+          },
+        ],
+        seoKeywords: [
+          'label printer south africa',
+          'portable label printer',
+          'thermal label printer small business',
+          'bluetooth label printer',
+          'home organization labels',
+          'price tag printer',
+          'retail labeling solution',
+          'niimbot south africa',
+        ],
+        contentIdeas: [
+          'How to Organize Your Small Business Inventory with a Label Printer (Step-by-Step)',
+          '10 Ways South African Small Business Owners Use Label Printers to Save Time',
+          'Niimbot B21 Review: The Best Budget Label Printer for South African Small Businesses in 2025',
+        ],
+        dataNeeded: ['Weekly click-through rate by listing variant', 'Add-to-cart rate and abandoned cart reasons', 'Inventory turnover by SKU size/color variant'],
+        dataMetrics: [
+          { metric: 'CTR (Click-Through Rate)', reason: 'Measures title and main image effectiveness — benchmark vs category average' },
+          { metric: 'Add-to-Cart Rate', reason: 'High CTR but low ATC = listing photos or reviews issue' },
+          { metric: 'Bundle Attach Rate', reason: 'What % of hardware buyers add labels to cart — measures cross-sell effectiveness' },
+          { metric: 'Label Repurchase Rate', reason: 'Critical metric for consumable business model — repeat purchase within 60 days' },
+        ],
+      };
+    }
+
+    setOutput(demoOutput);
+    setDemoLoading('');
+  }, []);
+
+  const handleAnalyze = async () => {
     if (!product.productName) return;
     setLoading(true);
-    // Simulate AI call — replace with real API in production
-    setTimeout(() => {
-      // In a real scenario, this would call an AI API
-      // For demo purposes, we show the prompt that would be sent
-      const prompt = buildPrompt(product);
-      console.log('Generated prompt:', prompt);
-      setLoading(false);
-      // For now, show demo output as placeholder
-      setOutput(DEMO_OUTPUT);
-    }, 1800);
-  };
+    setError(null);
 
-  const handleDemo = () => {
-    setProduct(DEFAULT_PRODUCT);
-    setOutput(DEMO_OUTPUT);
+    try {
+      const res = await fetch('/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        setError(data.error || 'Analysis failed. Please try again.');
+        return;
+      }
+
+      setOutput(data as AIOutput);
+    } catch (err: any) {
+      setError(err.message || 'Network error. Please check your connection.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -332,8 +746,8 @@ export default function App() {
               <span className="text-white font-bold text-sm">BR</span>
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-[#e5e5e5]">Black Rhino AI</h1>
-              <p className="text-xs text-[#737373]">Product Operations Assistant</p>
+              <h1 className="text-sm font-semibold text-[#e5e5e5]">Black Rhino AI 商品运营诊断助手</h1>
+              <p className="text-xs text-[#737373]">Product Operations Assistant · Powered by AI Workflow</p>
             </div>
           </div>
           <button
@@ -356,14 +770,30 @@ export default function App() {
             className="border-b border-[#1a1a1a] overflow-hidden"
           >
             <div className="max-w-7xl mx-auto px-6 py-3">
-              <p className="text-xs text-[#737373] mb-2 font-medium">Standardized Prompt Template</p>
-              <pre className="text-xs text-[#a3a3a3] bg-[#141414] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed">
-                {buildPrompt(product)}
+              <p className="text-xs text-[#737373] mb-2 font-medium">Standardized AI Prompt — sent to MiniMax API on each diagnosis</p>
+              <pre className="text-xs text-[#a3a3a3] bg-[#141414] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
+{`You are an AI e-commerce operations assistant for Black Rhino South Africa.
+
+Important rules:
+- Do NOT make conclusions about sales performance, profit margin, inventory turnover, ad ROI, or real SKU classification unless backend data is provided.
+- If the provided product information is insufficient, clearly state what cannot be analyzed.
+- Return valid JSON only. No markdown.
+
+[Product fields sent: productName, brand, category, price, currentTitle, description, currentSellingPoints, channel, targetUser, consumable, relatedProducts, reviewSamples, productUrl]
+
+Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], productPositioning, listingDiagnosis[], optimizedTitle, sellingPoints[], bundleRecommendation[], seoKeywords[], contentIdeas[], dataNeeded[], dataMetrics[]`}
               </pre>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Disclaimer Banner */}
+      <div className="flex-shrink-0 bg-orange-500/5 border-b border-orange-500/20 px-6 py-2">
+        <p className="max-w-7xl mx-auto text-xs text-[#a3a3a3] text-center">
+          <span className="text-orange-500 font-medium">Data Boundary:</span> This tool does not access Black Rhino backend data. It cannot determine real sales, margin, inventory, or ad ROI. Those require internal data access.
+        </p>
+      </div>
 
       {/* Main Content */}
       <main className="flex-1 overflow-hidden">
@@ -375,25 +805,34 @@ export default function App() {
                 <InputPanel
                   product={product}
                   onChange={setProduct}
-                  onGenerate={handleGenerate}
+                  onAnalyze={handleAnalyze}
                   onDemo={handleDemo}
                   loading={loading}
+                  demoLoading={demoLoading}
                 />
               </div>
             </div>
 
             {/* Output Panel */}
             <div className="col-span-12 lg:col-span-8 xl:col-span-9 h-full overflow-y-auto pr-1">
-              {output ? (
+              {error ? (
+                <div className="border border-red-500/30 rounded-xl p-4 bg-[#141414]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <AlertCircle size={16} className="text-red-500" />
+                    <span className="text-sm font-medium text-red-500">Error</span>
+                  </div>
+                  <p className="text-sm text-[#a3a3a3]">{error}</p>
+                </div>
+              ) : output ? (
                 <OutputSection output={output} />
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-center border border-dashed border-[#2a2a2a] rounded-2xl">
                   <div className="w-14 h-14 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mb-4">
-                    <TrendingUp size={24} className="text-[#525252]" />
+                    <BarChart2 size={24} className="text-[#525252]" />
                   </div>
-                  <h3 className="text-sm font-medium text-[#525252] mb-1">No output yet</h3>
+                  <h3 className="text-sm font-medium text-[#525252] mb-1">Ready to diagnose</h3>
                   <p className="text-xs text-[#3a3a3a] max-w-xs">
-                    Enter product information and click <span className="text-orange-500">Generate AI Diagnosis</span>, or load the demo to see a sample output.
+                    Fill in product information and click <span className="text-orange-500">Run SKU Diagnosis</span>, or load one of the 3 demo products above.
                   </p>
                 </div>
               )}
@@ -405,8 +844,8 @@ export default function App() {
       {/* Footer */}
       <footer className="flex-shrink-0 border-t border-[#1a1a1a] px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-[#525252]">
-          <span>Black Rhino AI 商品运营诊断助手 · Demo v0.1</span>
-          <span>Powered by Prompt Workflow (No API bound)</span>
+          <span>Black Rhino AI 商品运营诊断助手 · Demo v0.2</span>
+          <span>Powered by MiniMax API · No backend sales data accessed</span>
         </div>
       </footer>
     </div>

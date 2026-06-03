@@ -3,19 +3,30 @@ export interface ProductInfo {
   brand: string;
   category: string;
   price: string;
+  currentTitle: string;
   description: string;
+  currentSellingPoints: string;
   channel: 'Takealot' | 'Independent Store' | 'Both';
   targetUser: 'Home User' | 'Small Business' | 'Warehouse/Retail' | 'All';
   consumable: boolean;
   relatedProducts: string;
+  reviewSamples: string;
+  productUrl: string;
 }
 
 export interface AIOutput {
+  status: 'insufficient' | 'partial' | 'full';
+  dataSufficiencyScore: number;
+  canAnalyze: string[];
+  cannotAnalyze: string[];
+  productPositioning: string;
   listingDiagnosis: string[];
   optimizedTitle: string;
   sellingPoints: string[];
   bundleRecommendation: BundleItem[];
   seoKeywords: string[];
+  contentIdeas: string[];
+  dataNeeded: string[];
   dataMetrics: MetricItem[];
 }
 
@@ -30,54 +41,66 @@ export interface MetricItem {
   reason: string;
 }
 
-export const DEFAULT_PRODUCT: ProductInfo = {
-  productName: 'Niimbot B21 Label Printer',
-  brand: 'Niimbot',
-  category: 'Business Label Printer',
-  price: '',
-  description: '',
-  channel: 'Both',
-  targetUser: 'Small Business',
-  consumable: true,
-  relatedProducts: 'Series B Labels, Transparent Labels, Cable Labels',
-};
-
-export const DEMO_OUTPUT: AIOutput = {
-  listingDiagnosis: [
-    'Title focuses on product parameters but lacks user scenario words',
-    'Selling points do not highlight small business / home organization / warehouse labeling use cases',
-    'Missing compatible consumables info to reduce user purchase decision friction',
-  ],
-  optimizedTitle: 'NIIMBOT B21 Portable Label Printer for Small Business, Home Organization and Retail Labeling',
-  sellingPoints: [
-    'Portable thermal label printer designed for small businesses and home users',
-    'Ideal for price tags, storage labels, barcode labels and home organization',
-    'No ink or toner required — reduces long-term operating cost',
-    'Compatible with multiple label sizes (40x30mm, 50x30mm, etc.)',
-    'Suitable for retail stores, online sellers and warehouse labeling needs',
-  ],
-  bundleRecommendation: [
-    {
-      name: 'Small Business Starter Kit',
-      items: ['NIIMBOT B21 Printer', '50x30mm Labels (2 rolls)', 'Transparent Labels (1 roll)', 'Cable Labels (1 roll)'],
-      purpose: 'Increase average order value and reduce first-time buyer decision friction',
+export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
+  {
+    name: 'Niimbot B21 (设备+耗材)',
+    product: {
+      productName: 'Niimbot B21 Label Printer',
+      brand: 'Niimbot',
+      category: 'Business Label Printer',
+      price: '899 ZAR',
+      currentTitle: 'Niimbot B21 Thermal Label Printer Portable',
+      description:
+        'Portable thermal label printer for small businesses and home use. No ink required. Bluetooth connectivity. Works with Niimbot label rolls.',
+      currentSellingPoints: 'Portable, Thermal, Free Tape',
+      channel: 'Both',
+      targetUser: 'Small Business',
+      consumable: true,
+      relatedProducts: 'Series B Labels (50x30mm), Transparent Labels, Cable Labels',
+      reviewSamples:
+        'Good quality printer for the price. Easy setup. Labels peel off easily. Works well for small business inventory. A bit slow for large batches.',
+      productUrl: 'https://niimbot.co.za/products/b21',
     },
-  ],
-  seoKeywords: [
-    'label printer south africa',
-    'thermal label printer',
-    'small business label printer',
-    'barcode label printer',
-    'home organization labels',
-    'price tag printer',
-    'warehouse labeling solution',
-    'retail label maker',
-  ],
-  dataMetrics: [
-    { metric: 'CTR (Click-Through Rate)', reason: '衡量标题和主图吸引点击的能力' },
-    { metric: 'Conversion Rate', reason: '验证卖点是否有效转化为购买' },
-    { metric: 'Add-to-Cart Rate', reason: '判断Bundle套餐吸引力' },
-    { metric: 'Bundle AOV', reason: '追踪套餐对客单价的提升效果' },
-    { metric: 'Label Repeat Purchase Rate', reason: '监控耗材复购，复购率高是核心盈利点' },
-  ],
-};
+  },
+  {
+    name: 'Niimbot Labels (耗材复购型)',
+    product: {
+      productName: 'Niimbot Series B Label Rolls',
+      brand: 'Niimbot',
+      category: 'Label Consumables',
+      price: '129 ZAR',
+      currentTitle: 'Niimbot Series B Label Rolls (50x30mm)',
+      description:
+        'High-quality thermal labels compatible with Niimbot B21, B1, B3S printers. White paper stock, permanent adhesive.',
+      currentSellingPoints: 'Compatible, High Quality, Easy Peel',
+      channel: 'Both',
+      targetUser: 'Small Business',
+      consumable: true,
+      relatedProducts: 'Niimbot B21, Niimbot B1, Niimbot B3S',
+      reviewSamples:
+        'Labels stick well. Good value for money. Arrived quickly. Paper quality is better than expected. Will reorder.',
+      productUrl: 'https://niimbot.co.za/collections/labels',
+    },
+  },
+  {
+    name: 'Baseus Power Bank (3C同质化)',
+    product: {
+      productName: 'Baseus 20000mAh Power Bank',
+      brand: 'Baseus',
+      category: 'Power Bank',
+      price: '599 ZAR',
+      currentTitle: 'Baseus 20000mAh Power Bank Fast Charging',
+      description:
+        '20000mAh portable charger with dual USB-C and USB-A ports. Supports 65W fast charging for laptops and phones.',
+      currentSellingPoints: '20000mAh, 65W Fast Charging, Dual Port',
+      channel: 'Both',
+      targetUser: 'Home User',
+      consumable: false,
+      relatedProducts: 'USB-C Cable, Phone Case',
+      reviewSamples:
+        'Charges my phone fast. Capacity is real. A bit heavy. Build quality feels cheap compared to Anker. Works as described.',
+      productUrl: 'https://blackrhinoshop.com/products/baseus-power-bank',
+    },
+  },
+];
+
