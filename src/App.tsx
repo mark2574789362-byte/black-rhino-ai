@@ -395,24 +395,27 @@ function InputPanel({
         {field('Current Title', 'currentTitle', 'Paste current product title here')}
         {field('Description', 'description', 'Product description...', 'textarea')}
         {field('Current Selling Points', 'currentSellingPoints', 'e.g. Portable, Thermal, Free Tape', 'textarea')}
-        <div className="flex gap-2">
-          <input
-            type="url"
-            value={fetchUrl}
-            onChange={(e) => setFetchUrl(e.target.value)}
-            placeholder="Paste product URL to auto-fill..."
-            className="flex-1 bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] placeholder-[#525252] focus:border-orange-500 transition-colors"
-          />
-          <button
-            onClick={handleUrlFetch}
-            disabled={!fetchUrl || urlLoading}
-            className="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium flex items-center gap-2 transition-colors"
-          >
-            {urlLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
-            {urlLoading ? 'Fetching...' : 'Fetch'}
-          </button>
+        <div className="space-y-2">
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Product URL</label>
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={fetchUrl}
+              onChange={(e) => setFetchUrl(e.target.value)}
+              placeholder="Paste product URL to auto-fill..."
+              className="flex-1 bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] placeholder-[#525252] focus:border-orange-500 transition-colors"
+            />
+            <button
+              onClick={handleUrlFetch}
+              disabled={!fetchUrl || urlLoading}
+              className="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium flex items-center gap-2 transition-colors"
+            >
+              {urlLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+              {urlLoading ? 'Fetching...' : 'Fetch'}
+            </button>
+          </div>
+          {urlFetchError && <p className="text-xs text-red-500">{urlFetchError}</p>}
         </div>
-        {urlFetchError && <p className="text-xs text-red-500">{urlFetchError}</p>}
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Target Channel</label>
