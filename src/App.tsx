@@ -344,7 +344,7 @@ function InputPanel({
   const progress = Math.round((filledCount / 6) * 100);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 mb-4">
         <Package size={18} className="text-orange-500" />
         <h2 className="text-sm font-semibold text-[#e5e5e5]">Product Information</h2>
@@ -737,9 +737,9 @@ export default function App() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[#0f0f0f]">
+    <div className="min-h-screen flex flex-col bg-[#0f0f0f]">
       {/* Header */}
-      <header className="flex-shrink-0 border-b border-[#1a1a1a] px-6 py-4">
+      <header className="border-b border-[#1a1a1a] px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center">
@@ -789,19 +789,19 @@ Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], produ
       </AnimatePresence>
 
       {/* Disclaimer Banner */}
-      <div className="flex-shrink-0 bg-orange-500/5 border-b border-orange-500/20 px-6 py-2">
+      <div className="bg-orange-500/5 border-b border-orange-500/20 px-6 py-2">
         <p className="max-w-7xl mx-auto text-xs text-[#a3a3a3] text-center">
           <span className="text-orange-500 font-medium">Data Boundary:</span> This tool does not access Black Rhino backend data. It cannot determine real sales, margin, inventory, or ad ROI. Those require internal data access.
         </p>
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-hidden">
+      <main className="flex-1 overflow-auto">
         <div className="max-w-7xl mx-auto h-full px-6 py-5">
-          <div className="grid grid-cols-12 gap-5 h-full">
+          <div className="grid grid-cols-12 gap-5">
             {/* Input Panel */}
-            <div className="col-span-12 lg:col-span-4 xl:col-span-3 h-full">
-              <div className="h-full border border-[#1a1a1a] rounded-2xl p-5 bg-[#111111] overflow-hidden flex flex-col">
+            <div className="col-span-12 lg:col-span-4 xl:col-span-3">
+              <div className="border border-[#1a1a1a] rounded-2xl p-5 bg-[#111111] flex flex-col max-h-[calc(100vh-180px)] overflow-hidden">
                 <InputPanel
                   product={product}
                   onChange={setProduct}
@@ -814,7 +814,7 @@ Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], produ
             </div>
 
             {/* Output Panel */}
-            <div className="col-span-12 lg:col-span-8 xl:col-span-9 h-full overflow-y-auto pr-1">
+            <div className="col-span-12 lg:col-span-8 xl:col-span-9 overflow-y-auto pr-1">
               {error ? (
                 <div className="border border-red-500/30 rounded-xl p-4 bg-[#141414]">
                   <div className="flex items-center gap-2 mb-2">
@@ -842,7 +842,7 @@ Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], produ
       </main>
 
       {/* Footer */}
-      <footer className="flex-shrink-0 border-t border-[#1a1a1a] px-6 py-3">
+      <footer className="border-t border-[#1a1a1a] px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-[#525252]">
           <span>Black Rhino AI 商品运营诊断助手 · Demo v0.2</span>
           <span>Powered by MiniMax API · No backend sales data accessed</span>
