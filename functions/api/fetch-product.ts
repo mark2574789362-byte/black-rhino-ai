@@ -76,7 +76,7 @@ export async function onRequestPost(context: {
       });
     }
 
-    const extractRes = await fetch('https://api.minimaxi.chat/v1/text/chatcompletion_v2', {
+    const extractRes = await fetch('https://api.minimax.chat/v1/text/chatcompletion_v2', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
