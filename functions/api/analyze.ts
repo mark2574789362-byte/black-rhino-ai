@@ -134,7 +134,7 @@ Please analyze the product and return a JSON object with the following structure
   "canAnalyze": [<array of 3-5 things that CAN be analyzed with current data>],
   "cannotAnalyze": [<array of 3-5 things that CANNOT be analyzed without backend data>],
   "productPositioning": "<1-2 sentence positioning for South African market>",
-  "listingDiagnosis": [<array of 3 specific issues found in current listing>],
+  "skuStrategy": "<1-2 sentence SKU role + 4 priority actions>",
   "optimizedTitle": "<improved title suitable for South African e-commerce, clear and search-friendly>",
   "sellingPoints": [<array of 5 bullet points, practical and localized for South African users>],
   "bundleRecommendation": [
@@ -148,7 +148,7 @@ Please analyze the product and return a JSON object with the following structure
   "contentIdeas": [<array of 3 blog/content topic ideas for SEO>],
   "dataNeeded": [<array of 3-5 additional data points needed for deeper analysis>],
   "dataMetrics": [
-    { "metric": "<metric name>", "reason": "<why this metric matters for this product>" }
+    { "metric": "<metric name>", "reason": "<why this metric matters>", "nextAction": "<what to do if metric underperforms>" }
   ]
 }
 

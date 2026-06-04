@@ -123,6 +123,17 @@ function OutputSection({ output }: { output: AIOutput }) {
         </div>
       )}
 
+      {/* SKU Operation Strategy */}
+      {output.skuStrategy && (
+        <div className="border border-orange-500/30 rounded-xl p-4 bg-[#141414]">
+          <div className="flex items-center gap-2 mb-2">
+            <Zap size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">SKU Operation Strategy</span>
+          </div>
+          <p className="text-sm text-[#a3a3a3] leading-relaxed whitespace-pre-wrap">{output.skuStrategy}</p>
+        </div>
+      )}
+
       {/* Listing Diagnosis */}
       {output.listingDiagnosis.length > 0 && (
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
@@ -249,7 +260,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-orange-500/30 rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <AlertCircle size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">Data Needed for Deeper Analysis</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">If Internal Data Is Available</span>
           </div>
           <div className="p-4">
             <ul className="space-y-2">
@@ -271,13 +282,18 @@ function OutputSection({ output }: { output: AIOutput }) {
             <BarChart2 size={14} className="text-orange-500" />
             <span className="text-sm font-medium text-[#e5e5e5]">Data Validation Metrics</span>
           </div>
-          <div className="p-4 space-y-2">
+          <div className="p-4 space-y-3">
             {output.dataMetrics.map((m, i) => (
               <div key={i} className="flex items-start gap-3 text-sm">
                 <div className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0 mt-1.5" />
-                <div>
-                  <span className="text-[#e5e5e5] font-medium">{m.metric}</span>
-                  <span className="text-[#737373] text-xs ml-2">— {m.reason}</span>
+                <div className="flex-1">
+                  <div>
+                    <span className="text-[#e5e5e5] font-medium">{m.metric}</span>
+                    <span className="text-[#737373] text-xs ml-2">— {m.reason}</span>
+                  </div>
+                  {m.nextAction && (
+                    <p className="text-xs text-orange-500/80 mt-0.5">→ {m.nextAction}</p>
+                  )}
                 </div>
               </div>
             ))}
@@ -479,7 +495,7 @@ function InputPanel({
 
         {/* Demo Buttons */}
         <div className="pt-2 border-t border-[#2a2a2a] space-y-2">
-          <p className="text-xs font-medium text-[#737373] uppercase tracking-wide">Load Demo</p>
+          <p className="text-xs font-medium text-[#737373] uppercase tracking-wide">Business Scenarios</p>
           <div className="grid grid-cols-1 gap-2">
             {DEMO_PRODUCTS.map((demo) => (
               <button
@@ -594,10 +610,11 @@ export default function App() {
         ],
         dataNeeded: ['Monthly sales velocity per SKU', 'Gross margin per product line', 'Return and defect rate by category'],
         dataMetrics: [
-          { metric: 'B2B Quote Request Rate', reason: 'Tracks B2B channel demand' },
-          { metric: 'Label Volume per Customer', reason: 'Indicates consumable repurchase potential' },
-          { metric: 'Return Rate by Product', reason: 'High return rate signals listing vs reality mismatch' },
+          { metric: 'B2B Quote Request Rate', reason: 'Tracks B2B channel demand', nextAction: 'If quote requests are high but conversions low, review pricing for B2B segment' },
+          { metric: 'Label Volume per Customer', reason: 'Indicates consumable repurchase potential', nextAction: 'If volume drops, trigger repurchase reminder email sequence' },
+          { metric: 'Return Rate by Product', reason: 'High return rate signals listing vs reality mismatch', nextAction: 'If return rate is high, review listing description accuracy and photo fidelity' },
         ],
+        skuStrategy: 'This hardware SKU should serve as an entry point to drive label repurchase. Priority: (1) Optimize listing conversion for first order, (2) Add consumable bundle to raise AOV, (3) Track label attach rate per order, (4) Build 60-day repurchase email sequence for consumables.',
       };
     } else if (isConsumable && !isLabelPrinter) {
       demoOutput = {
@@ -623,7 +640,7 @@ export default function App() {
           {
             name: 'Small Business Label Value Pack',
             items: ['Niimbot Series B Labels (5 rolls)', 'Cable Labels (1 roll)', 'Transparent Labels (1 roll)'],
-            purpose: 'Increase AOV by 35% vs single-roll purchase; provides variety for different labeling needs',
+            purpose: 'Test whether multi-roll bundle improves AOV compared with single-roll purchase',
           },
           {
             name: 'Auto-Replenishment Plan',
@@ -648,10 +665,11 @@ export default function App() {
         ],
         dataNeeded: ['Current monthly reorder rate by customer', 'Average order frequency for consumables', 'Churn rate of customers who only bought consumables once'],
         dataMetrics: [
-          { metric: 'Repeat Purchase Rate', reason: 'Core health metric for consumable SKUs — should exceed 40% within 90 days' },
-          { metric: 'Consumable/Hardware Ratio', reason: 'High ratio signals strong耗材 ecosystem; low ratio signals hardware-only buyers' },
-          { metric: 'Customer LTV', reason: 'Track LTV by acquisition channel to optimize ad spend' },
+          { metric: 'Repeat Purchase Rate', reason: 'Core health metric for consumable SKUs', nextAction: 'Track repeat purchase within 60-90 days to validate consumable retention' },
+          { metric: 'Consumable/Hardware Ratio', reason: 'High ratio signals strong consumables ecosystem', nextAction: 'If ratio is low, investigate why hardware buyers are not converting to consumables' },
+          { metric: 'Customer LTV', reason: 'Track LTV by acquisition channel to optimize ad spend', nextAction: 'Use LTV data to decide where to increase or decrease ad spend' },
         ],
+        skuStrategy: 'This consumable SKU is the LTV core of the category. Priority: (1) Drive first-time trial with value-pack bundle, (2) Convert to subscription or auto-replenishment, (3) Track reorder rate per customer segment, (4) Monitor consumable attach rate from hardware buyers.',
       };
     } else if (isBaseus) {
       demoOutput = {
@@ -676,7 +694,7 @@ export default function App() {
         bundleRecommendation: [{
           name: 'Student & Remote Worker Bundle',
           items: ['Baseus 20000mAh Power Bank', 'USB-C to USB-C Cable (1m)', 'Compact Travel Pouch'],
-          purpose: 'Bundle addresses the "I need everything to charge on the go" pain point — raises AOV by R150-200',
+          purpose: 'Potentially improve AOV if customers accept accessory bundles',
         }],
         seoKeywords: [
           'power bank south africa',
@@ -695,10 +713,11 @@ export default function App() {
         ],
         dataNeeded: ['Sales rank by category on Takealot', 'Customer review sentiment by feature', 'Traffic source breakdown (organic vs paid vs Takealot internal)'],
         dataMetrics: [
-          { metric: 'Category Sales Rank', reason: 'Tracks competitive position against Anker and other brands' },
-          { metric: 'Review Sentiment Score', reason: 'Aggregate sentiment from reviews tells you which features resonate' },
-          { metric: 'Add-to-Cart vs Purchase Rate', reason: 'High add-to-cart but low purchase = price or reviews issue' },
+          { metric: 'Category Sales Rank', reason: 'Tracks competitive position against Anker and other brands', nextAction: 'If rank drops, review competitor pricing and adjust bundle offers' },
+          { metric: 'Review Sentiment Score', reason: 'Aggregate sentiment from reviews tells you which features resonate', nextAction: 'Use sentiment breakdown to prioritize next listing improvement' },
+          { metric: 'Add-to-Cart vs Purchase Rate', reason: 'High add-to-cart but low purchase = price or reviews issue', nextAction: 'If ATC is high but purchase is low, optimize price or address review concerns' },
         ],
+        skuStrategy: 'This 3C SKU operates in a crowded competitive space. Priority: (1) Differentiate via use-case scenarios, not raw specs, (2) Build bundle offers to raise AOV, (3) Monitor category rank and review sentiment, (4) Test price elasticity before discounting.',
       };
     } else {
       // Default: Niimbot B21 style
@@ -725,7 +744,7 @@ export default function App() {
           {
             name: 'Small Business Starter Kit',
             items: ['Niimbot B21 Printer', 'Series B Labels (2 rolls: 50x30mm)', 'Transparent Labels (1 roll)', 'Cable Labels (1 roll)'],
-            purpose: 'Raise AOV by R150-250 and reduce first-time buyer friction — everything needed to start labeling immediately',
+            purpose: 'Potentially improve AOV if customers accept accessory bundles',
           },
         ],
         seoKeywords: [
@@ -745,11 +764,12 @@ export default function App() {
         ],
         dataNeeded: ['Weekly click-through rate by listing variant', 'Add-to-cart rate and abandoned cart reasons', 'Inventory turnover by SKU size/color variant'],
         dataMetrics: [
-          { metric: 'CTR (Click-Through Rate)', reason: 'Measures title and main image effectiveness — benchmark vs category average' },
-          { metric: 'Add-to-Cart Rate', reason: 'High CTR but low ATC = listing photos or reviews issue' },
-          { metric: 'Bundle Attach Rate', reason: 'What % of hardware buyers add labels to cart — measures cross-sell effectiveness' },
-          { metric: 'Label Repurchase Rate', reason: 'Critical metric for consumable business model — repeat purchase within 60 days' },
+          { metric: 'CTR (Click-Through Rate)', reason: 'Measures title and main image effectiveness vs category average', nextAction: 'If CTR is low, test alternative titles and main images' },
+          { metric: 'Add-to-Cart Rate', reason: 'High CTR but low ATC = listing photos or reviews issue', nextAction: 'If add-to-cart is low despite good CTR, review listing photos and review scores' },
+          { metric: 'Bundle Attach Rate', reason: 'What % of hardware buyers add labels to cart — measures cross-sell effectiveness', nextAction: 'If attach rate is low, test bundle discount or auto-bundle at checkout' },
+          { metric: 'Label Repurchase Rate', reason: 'Critical metric for consumable business model — repeat purchase within 60 days', nextAction: 'If repurchase rate is low, set up automated replenishment reminder for lapsed customers' },
         ],
+        skuStrategy: 'This versatile hardware SKU attracts multiple buyer segments. Priority: (1) Capture first-order conversion with clear use-case messaging, (2) Push bundle and accessory cross-sell, (3) Track add-to-cart and conversion rate per segment, (4) Convert hardware buyers to label consumable repurchase.',
       };
     }
 

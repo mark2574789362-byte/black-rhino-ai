@@ -20,6 +20,7 @@ export interface AIOutput {
   canAnalyze: string[];
   cannotAnalyze: string[];
   productPositioning: string;
+  skuStrategy: string;
   listingDiagnosis: string[];
   optimizedTitle: string;
   sellingPoints: string[];
@@ -39,11 +40,12 @@ export interface BundleItem {
 export interface MetricItem {
   metric: string;
   reason: string;
+  nextAction: string;
 }
 
 export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
   {
-    name: 'Niimbot B21 (设备+耗材)',
+    name: '设备 + 耗材复购模型',
     product: {
       productName: 'Niimbot B21 Label Printer',
       brand: 'Niimbot',
@@ -63,7 +65,7 @@ export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
     },
   },
   {
-    name: 'Niimbot Labels (耗材复购型)',
+    name: '高复购耗材模型',
     product: {
       productName: 'Niimbot Series B Label Rolls',
       brand: 'Niimbot',
@@ -83,7 +85,7 @@ export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
     },
   },
   {
-    name: 'Baseus Power Bank (3C同质化)',
+    name: '3C 同质化竞争模型',
     product: {
       productName: 'Baseus 20000mAh Power Bank',
       brand: 'Baseus',
