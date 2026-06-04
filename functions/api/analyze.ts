@@ -22,7 +22,7 @@ export async function onRequestPost(context: {
   }
 
   const prompt = buildPrompt(product as any);
-  const model = env.MINIMAX_MODEL || 'abab6.5s';
+  const model = env.MINIMAX_MODEL || 'abab6.5s-chat';
 
   try {
     const response = await fetch('https://api.minimaxi.chat/v1/text/chatcompletion_v2', {
