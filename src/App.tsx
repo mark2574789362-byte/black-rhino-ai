@@ -303,6 +303,34 @@ function InputPanel({
   loading: boolean;
   demoLoading: string;
 }) {
+  const [fetchUrl, setFetchUrl] = useState('');
+  const [urlLoading, setUrlLoading] = useState(false);
+  const [urlFetchError, setUrlFetchError] = useState<string | null>(null);
+
+
+  const handleUrlFetch = async () => {
+    if (!fetchUrl) return;
+    setUrlLoading(true);
+    setUrlFetchError(null);
+    try {
+      const res = await fetch('/api/fetch-product', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: fetchUrl }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setUrlFetchError(data.error || 'Failed to fetch');
+        return;
+      }
+      onChange({ ...product, ...data });
+    } catch (err: any) {
+      setUrlFetchError(err.message);
+    } finally {
+      setUrlLoading(false);
+    }
+  };
+
   const field = (
     label: string,
     key: keyof ProductInfo,
@@ -368,6 +396,25 @@ function InputPanel({
         {field('Description', 'description', 'Product description...', 'textarea')}
         {field('Current Selling Points', 'currentSellingPoints', 'e.g. Portable, Thermal, Free Tape', 'textarea')}
         {field('Product URL', 'productUrl', 'https://...')}
+
+        <div className="flex gap-2">
+          <input
+            type="url"
+            value={fetchUrl}
+            onChange={(e) => setFetchUrl(e.target.value)}
+            placeholder="Paste product URL to auto-fill..."
+            className="flex-1 bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] placeholder-[#525252] focus:border-orange-500 transition-colors"
+          />
+          <button
+            onClick={handleUrlFetch}
+            disabled={!fetchUrl || urlLoading}
+            className="px-3 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium flex items-center gap-1.5 transition-colors whitespace-nowrap"
+          >
+            {urlLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+            {urlLoading ? 'Fetching...' : 'Fetch'}
+          </button>
+        </div>
+        {urlFetchError && <p className="text-xs text-red-500">{urlFetchError}</p>}
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Target Channel</label>
@@ -801,7 +848,7 @@ Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], produ
           <div className="grid grid-cols-12 gap-5">
             {/* Input Panel */}
             <div className="col-span-12 lg:col-span-4 xl:col-span-3">
-              <div className="border border-[#1a1a1a] rounded-2xl p-5 bg-[#111111] flex flex-col max-h-[calc(100vh-180px)] overflow-hidden">
+              <div className="border border-[#1a1a1a] rounded-2xl p-5 bg-[#111111] flex flex-col max-h-[calc(100vh-180px)] overflow-y-auto">
                 <InputPanel
                   product={product}
                   onChange={setProduct}
