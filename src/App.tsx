@@ -395,8 +395,6 @@ function InputPanel({
         {field('Current Title', 'currentTitle', 'Paste current product title here')}
         {field('Description', 'description', 'Product description...', 'textarea')}
         {field('Current Selling Points', 'currentSellingPoints', 'e.g. Portable, Thermal, Free Tape', 'textarea')}
-        {field('Product URL', 'productUrl', 'https://...')}
-
         <div className="flex gap-2">
           <input
             type="url"
@@ -408,7 +406,7 @@ function InputPanel({
           <button
             onClick={handleUrlFetch}
             disabled={!fetchUrl || urlLoading}
-            className="px-3 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium flex items-center gap-1.5 transition-colors whitespace-nowrap"
+            className="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium flex items-center gap-2 transition-colors"
           >
             {urlLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
             {urlLoading ? 'Fetching...' : 'Fetch'}
