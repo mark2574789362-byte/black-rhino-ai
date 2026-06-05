@@ -68,6 +68,14 @@ export const I18N = {
     fetching: { zh: '抓取中...', en: 'Fetching...' },
     fetch: { zh: '抓取', en: 'Fetch' },
     progressLabel: { zh: '完成度', en: 'Progress' },
+    minFieldsHint: {
+      zh: '建议至少填完 4 个字段以获得完整诊断',
+      en: 'Fill at least 4 fields for a complete diagnosis',
+    },
+    missingFieldsTitle: {
+      zh: '为获得更准确的诊断，请补全以下字段',
+      en: 'For a more accurate diagnosis, please fill in:',
+    },
   },
 
   // ============ Output Section ============
@@ -102,6 +110,10 @@ export const I18N = {
     fetchFailed: { zh: '抓取失败', en: 'Failed to fetch' },
     networkError: { zh: '网络错误，请检查连接。', en: 'Network error. Please check your connection.' },
     analyzeFailed: { zh: '诊断失败，请重试。', en: 'Analysis failed. Please try again.' },
+    infoInsufficient: {
+      zh: '信息不足报告 — 请补全更多字段以获得完整诊断。',
+      en: 'Insufficient data report — please fill in more fields for a complete diagnosis.',
+    },
   },
 
   // ============ Demo products ============
@@ -114,6 +126,33 @@ export const I18N = {
   // ============ Prompt preview ============
   promptPreview: {
     title: { zh: '标准化 AI 提示词 — 每次诊断时发送给 MiniMax API', en: 'Standardized AI Prompt — sent to MiniMax API on each diagnosis' },
+  },
+
+  // ============ Business Value Card (业务领导视角) ============
+  businessValue: {
+    title: { zh: '本工具如何赋能 Black Rhino 业务', en: 'How this helps Black Rhino operations' },
+    items: {
+      reduce: {
+        zh: '减少重复的 SKU 诊断工作',
+        en: 'Reduce repetitive SKU diagnosis work',
+      },
+      standardize: {
+        zh: '将 Listing 评审流程标准化',
+        en: 'Standardize listing review process',
+      },
+      bundle: {
+        zh: '识别套餐与复购机会',
+        en: 'Identify bundle and repeat purchase opportunities',
+      },
+      metric: {
+        zh: '建立基于指标的数据验证工作流',
+        en: 'Create a metric-based validation workflow',
+      },
+      upgrade: {
+        zh: '接入内部数据后可升级为 SKU 分级与诊断的流水线',
+        en: 'Upgrade to SKU classification pipeline after internal data access',
+      },
+    },
   },
 
   // ============ Footer ============

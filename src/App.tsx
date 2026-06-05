@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, Package, Search, BarChart2, ShoppingCart, FileText,
   Loader2, Copy, CheckCheck, RotateCw, Languages,
-  AlertCircle, CheckCircle2, Info
+  AlertCircle, CheckCircle2, Info, Briefcase
 } from 'lucide-react';
 import type { ProductInfo, AIOutput } from './types';
 import { DEMO_PRODUCTS, DEMO_OUTPUTS_EN } from './types';
@@ -308,8 +308,83 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
   );
 }
 
+function BusinessValueCard() {
+  const { tr } = useLang();
+  const items = [
+    { key: 'reduce' as const, icon: '⚙️' },
+    { key: 'standardize' as const, icon: '📋' },
+    { key: 'bundle' as const, icon: '🧩' },
+    { key: 'metric' as const, icon: '📊' },
+    { key: 'upgrade' as const, icon: '🚀' },
+  ];
+  return (
+    <div className="border border-orange-500/30 rounded-xl p-4 bg-gradient-to-br from-orange-500/5 to-transparent">
+      <div className="flex items-center gap-2 mb-3">
+        <Briefcase size={15} className="text-orange-500" />
+        <span className="text-sm font-semibold text-[#e5e5e5]">{tr(I18N.businessValue.title)}</span>
+      </div>
+      <ol className="space-y-2">
+        {items.map((it, i) => (
+          <li key={it.key} className="flex items-start gap-2.5 text-sm text-[#a3a3a3] leading-relaxed">
+            <span className="text-orange-500 mt-0.5 flex-shrink-0 font-medium min-w-[1.25rem]">{i + 1}.</span>
+            <span>{tr(I18N.businessValue.items[it.key])}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+
 function OutputSection({ output }: { output: AIOutput }) {
-  const { t } = useLang();
+  const { t, tr } = useLang();
+  // 信息不足报告：只渲染提示卡片，不渲染后续模块
+  if (output.status === 'insufficient') {
+    return (
+      <div className="space-y-3">
+        <div className="border border-amber-500/40 rounded-xl p-5 bg-amber-500/5">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertCircle size={16} className="text-amber-500" />
+            <span className="text-sm font-semibold text-amber-500">{tr(I18N.error.infoInsufficient)}</span>
+          </div>
+          <p className="text-sm text-[#a3a3a3] mb-3 leading-relaxed">{tr(I18N.input.minFieldsHint)}</p>
+          <div className="text-xs font-medium text-[#737373] uppercase tracking-wide mb-2">{tr(I18N.input.missingFieldsTitle)}</div>
+          <ul className="space-y-1.5">
+            {output.cannotAnalyze.map((field, i) => {
+              const labelMap: Record<string, { zh: string; en: string }> = {
+                brand: { zh: '品牌', en: 'Brand' },
+                category: { zh: '类目', en: 'Category' },
+                price: { zh: '价格', en: 'Price' },
+                currentTitle: { zh: '当前商品标题', en: 'Current Title' },
+                description: { zh: '商品描述', en: 'Description' },
+                currentSellingPoints: { zh: '当前卖点', en: 'Current Selling Points' },
+                reviewSamples: { zh: '评价样例', en: 'Review Samples' },
+              };
+              const label = labelMap[field];
+              return (
+                <li key={i} className="flex items-center gap-2 text-sm text-amber-500/90">
+                  <span className="w-1 h-1 rounded-full bg-amber-500 flex-shrink-0" />
+                  {label ? tr(label) : field}
+                </li>
+              );
+            })}
+          </ul>
+          <div className="mt-4 pt-4 border-t border-amber-500/20">
+            <div className="text-xs font-medium text-[#737373] uppercase tracking-wide mb-2">
+              {tr(I18N.output.dataNeeded)}
+            </div>
+            <ul className="space-y-1">
+              {output.dataNeeded.map((item, i) => (
+                <li key={i} className="flex items-start gap-2 text-xs text-[#a3a3a3]">
+                  <span className="text-amber-500/70 flex-shrink-0">•</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-3">
       <DataSufficiencyCard
@@ -357,6 +432,78 @@ function OutputSection({ output }: { output: AIOutput }) {
         </div>
       )}
 
+
+      {output.bundleRecommendation.length > 0 && (
+        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <ShoppingCart size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'bundle')}</span>
+          </div>
+          <div className="p-4 space-y-3">
+            {output.bundleRecommendation.map((bundle, i) => (
+              <div key={i} className="border border-[#2a2a2a] rounded-lg p-3 bg-[#1a1a1a]">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="text-sm font-medium text-orange-500">{bundle.name}</h4>
+                </div>
+                <ul className="space-y-1 mb-2">
+                  {bundle.items.map((item, j) => (
+                    <li key={j} className="text-xs text-[#a3a3a3] flex items-center gap-1.5">
+                      <span className="text-[#525252]">•</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-xs text-[#737373] italic">{bundle.purpose}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {output.dataMetrics.length > 0 && (
+        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <BarChart2 size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'dataMetrics')}</span>
+          </div>
+          <div className="p-4 space-y-3">
+            {output.dataMetrics.map((m, i) => (
+              <div key={i} className="flex items-start gap-3 text-sm">
+                <div className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0 mt-1.5" />
+                <div className="flex-1">
+                  <div>
+                    <span className="text-[#e5e5e5] font-medium">{m.metric}</span>
+                    <span className="text-[#737373] text-xs ml-2">— {m.reason}</span>
+                  </div>
+                  {m.nextAction && (
+                    <p className="text-xs text-orange-500/80 mt-0.5">→ {m.nextAction}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {output.dataNeeded.length > 0 && (
+        <div className="border border-orange-500/30 rounded-xl overflow-hidden bg-[#141414]">
+          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
+            <AlertCircle size={14} className="text-orange-500" />
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'dataNeeded')}</span>
+          </div>
+          <div className="p-4">
+            <ul className="space-y-2">
+              {output.dataNeeded.map((item, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-[#a3a3a3]">
+                  <span className="text-orange-500 mt-0.5 flex-shrink-0">•</span>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
+
       {output.optimizedTitle && (
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
@@ -385,33 +532,6 @@ function OutputSection({ output }: { output: AIOutput }) {
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
-      )}
-
-      {output.bundleRecommendation.length > 0 && (
-        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
-          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
-            <ShoppingCart size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'bundle')}</span>
-          </div>
-          <div className="p-4 space-y-3">
-            {output.bundleRecommendation.map((bundle, i) => (
-              <div key={i} className="border border-[#2a2a2a] rounded-lg p-3 bg-[#1a1a1a]">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-medium text-orange-500">{bundle.name}</h4>
-                </div>
-                <ul className="space-y-1 mb-2">
-                  {bundle.items.map((item, j) => (
-                    <li key={j} className="text-xs text-[#a3a3a3] flex items-center gap-1.5">
-                      <span className="text-[#525252]">•</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-xs text-[#737373] italic">{bundle.purpose}</p>
-              </div>
-            ))}
           </div>
         </div>
       )}
@@ -452,27 +572,7 @@ function OutputSection({ output }: { output: AIOutput }) {
           </div>
         </div>
       )}
-
-      {output.dataNeeded.length > 0 && (
-        <div className="border border-orange-500/30 rounded-xl overflow-hidden bg-[#141414]">
-          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
-            <AlertCircle size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'dataNeeded')}</span>
-          </div>
-          <div className="p-4">
-            <ul className="space-y-2">
-              {output.dataNeeded.map((item, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-[#a3a3a3]">
-                  <span className="text-orange-500 mt-0.5 flex-shrink-0">•</span>
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-
-      {output.dataMetrics.length > 0 && (
+                                                {output.dataMetrics.length > 0 && (
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <BarChart2 size={14} className="text-orange-500" />
@@ -727,7 +827,7 @@ function InputPanel({
         <div className="pt-2 space-y-2">
           <button
             onClick={onAnalyze}
-            disabled={loading || !product.productName}
+            disabled={loading}
             className="w-full py-3 rounded-xl bg-orange-600 hover:bg-orange-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-semibold flex items-center justify-center gap-2 transition-colors"
           >
             {loading ? (
@@ -742,6 +842,9 @@ function InputPanel({
               </>
             )}
           </button>
+          <p className="text-[10px] text-[#525252] text-center leading-relaxed px-2">
+            {t('input', 'minFieldsHint')}
+          </p>
         </div>
       </div>
     </div>
@@ -806,6 +909,45 @@ export default function App() {
     if (!product.productName) return;
     setLoading(true);
     setError(null);
+
+    // 检查必填字段。产品名称是必要项；为获得完整诊断，建议补全品牌、类目、描述、当前卖点。
+    // 实际可填项 7 个（不含 productName）：brand / category / price / currentTitle / description / currentSellingPoints / reviewSamples
+    // 低于 3 个填项，输出信息不足报告
+    const fillableFields: Array<keyof ProductInfo> = [
+      'brand', 'category', 'price', 'currentTitle',
+      'description', 'currentSellingPoints', 'reviewSamples',
+    ];
+    const filledFields = fillableFields.filter(f => (product[f] as string)?.trim().length);
+    const missingFields = fillableFields.filter(f => !(product[f] as string)?.trim().length);
+
+    if (filledFields.length < 3) {
+      // 前端生成“信息不足报告” 不调后端 AI 避免误差
+      const insufficient: AIOutput = {
+        status: 'insufficient',
+        dataSufficiencyScore: Math.max(15, filledFields.length * 12),
+        canAnalyze: [],
+        cannotAnalyze: missingFields,
+        productPositioning: '',
+        skuStrategy: '',
+        listingDiagnosis: [],
+        optimizedTitle: '',
+        sellingPoints: [],
+        bundleRecommendation: [],
+        seoKeywords: [],
+        contentIdeas: [],
+        dataNeeded: [
+          'Monthly sales velocity per SKU',
+          'Gross margin per product line',
+          'Inventory turnover days',
+          'Customer repurchase rate',
+          'Category sales rank vs competitors',
+        ],
+        dataMetrics: [],
+      };
+      setOutput(insufficient);
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch('/api/analyze', {
@@ -932,14 +1074,19 @@ Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], produ
                   <OutputSection output={output} />
                 </>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-center border border-dashed border-[#2a2a2a] rounded-2xl">
-                  <div className="w-14 h-14 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mb-4">
-                    <BarChart2 size={24} className="text-[#525252]" />
+                <div className="space-y-3">
+                  {/* 业务价值说明（业务领导视角） */}
+                  <BusinessValueCard />
+                  {/* 顶部 banner 提示 */}
+                  <div className="border border-dashed border-[#2a2a2a] rounded-2xl p-8 text-center">
+                    <div className="w-14 h-14 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mb-4 mx-auto">
+                      <BarChart2 size={24} className="text-[#525252]" />
+                    </div>
+                    <h3 className="text-sm font-medium text-[#525252] mb-1">{tr(I18N.empty.title)}</h3>
+                    <p className="text-xs text-[#3a3a3a] max-w-xs mx-auto">
+                      {tr(I18N.empty.desc)}
+                    </p>
                   </div>
-                  <h3 className="text-sm font-medium text-[#525252] mb-1">{tr(I18N.empty.title)}</h3>
-                  <p className="text-xs text-[#3a3a3a] max-w-xs">
-                    {tr(I18N.empty.desc)}
-                  </p>
                 </div>
               )}
             </div>

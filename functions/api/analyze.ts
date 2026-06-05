@@ -84,15 +84,16 @@ export async function onRequestPost(context: {
       }
     }
 
-    // Validate required fields
-    if (!parsed.dataSufficiencyScore || !parsed.canAnalyze || !parsed.cannotAnalyze) {
+    // Normalize: ensure all required fields exist with safe defaults so frontend never crashes
+    const normalized = normalizeOutput(parsed);
+    if (!normalized) {
       return new Response(
-        JSON.stringify({ error: 'Invalid AI response structure', parsed }),
+        JSON.stringify({ error: 'AI response missing all required fields' }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
-    return new Response(JSON.stringify(parsed), {
+    return new Response(JSON.stringify(normalized), {
       headers: { 'Content-Type': 'application/json' },
     });
   } catch (err: any) {
@@ -101,6 +102,70 @@ export async function onRequestPost(context: {
       headers: { 'Content-Type': 'application/json' },
     });
   }
+}
+
+// 补齐所有可能缺失的字段，让前端永远不会拿到 NaN/null/undefined 导致的 crash
+function normalizeOutput(raw: any): any | null {
+  if (!raw || typeof raw !== 'object') return null;
+
+  // 关键字段：必须至少有 1 个，否则认为该返回不可用
+  const hasAny = raw.dataSufficiencyScore != null
+    || raw.productPositioning
+    || raw.optimizedTitle
+    || (Array.isArray(raw.sellingPoints) && raw.sellingPoints.length);
+  if (!hasAny) return null;
+
+  const safeArr = (v: any, max = 10): string[] => {
+    if (!Array.isArray(v)) return [];
+    return v.filter((x: any) => typeof x === 'string' && x.trim().length).slice(0, max);
+  };
+  const safeStr = (v: any, fallback = ''): string => {
+    return typeof v === 'string' ? v : fallback;
+  };
+  const safeScore = (v: any): number => {
+    const n = Number(v);
+    if (!Number.isFinite(n)) return 0;
+    return Math.max(0, Math.min(100, Math.round(n)));
+  };
+  const safeBundles = (v: any): any[] => {
+    if (!Array.isArray(v)) return [];
+    return v
+      .filter((b: any) => b && typeof b === 'object')
+      .slice(0, 5)
+      .map((b: any) => ({
+        name: safeStr(b.name, 'Bundle'),
+        items: safeArr(b.items, 10),
+        purpose: safeStr(b.purpose),
+      }));
+  };
+  const safeMetrics = (v: any): any[] => {
+    if (!Array.isArray(v)) return [];
+    return v
+      .filter((m: any) => m && typeof m === 'object')
+      .slice(0, 8)
+      .map((m: any) => ({
+        metric: safeStr(m.metric, ''),
+        reason: safeStr(m.reason, ''),
+        nextAction: safeStr(m.nextAction, ''),
+      }));
+  };
+
+  return {
+    status: ['insufficient', 'partial', 'full'].includes(raw.status) ? raw.status : 'partial',
+    dataSufficiencyScore: safeScore(raw.dataSufficiencyScore),
+    canAnalyze: safeArr(raw.canAnalyze, 5),
+    cannotAnalyze: safeArr(raw.cannotAnalyze, 5),
+    productPositioning: safeStr(raw.productPositioning),
+    skuStrategy: safeStr(raw.skuStrategy),
+    listingDiagnosis: safeArr(raw.listingDiagnosis, 10),
+    optimizedTitle: safeStr(raw.optimizedTitle),
+    sellingPoints: safeArr(raw.sellingPoints, 10),
+    bundleRecommendation: safeBundles(raw.bundleRecommendation),
+    seoKeywords: safeArr(raw.seoKeywords, 12),
+    contentIdeas: safeArr(raw.contentIdeas, 6),
+    dataNeeded: safeArr(raw.dataNeeded, 8),
+    dataMetrics: safeMetrics(raw.dataMetrics),
+  };
 }
 
 function buildPrompt(info: Record<string, string | boolean | string[]>, lang: 'zh' | 'en'): string {
