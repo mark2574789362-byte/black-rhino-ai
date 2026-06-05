@@ -26,7 +26,7 @@ function CopyButton({ text }: { text: string }) {
       className="inline-flex items-center gap-1 text-xs text-[#737373] hover:text-orange-500 transition-colors"
     >
       {copied ? <CheckCheck size={12} /> : <Copy size={12} />}
-      {copied ? t('output')('copied') : t('output')('copy')}
+      {copied ? t('output', 'copied') : t('output', 'copy')}
     </button>
   );
 }
@@ -42,7 +42,7 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
     <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
       <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
         <Info size={16} className="text-orange-500" />
-        <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('dataSufficiency')}</span>
+        <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'dataSufficiency')}</span>
       </div>
       <div className="p-4">
         <div className="flex items-center gap-4 mb-4">
@@ -62,15 +62,15 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
             </span>
           </div>
           <div className="flex-1">
-            <div className="text-xs text-[#737373] mb-2">{t('output')('dataSufficiencyNote')}</div>
+            <div className="text-xs text-[#737373] mb-2">{t('output', 'dataSufficiencyNote')}</div>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 size={13} className="text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs text-[#a3a3a3]">{t('output')('canBeAnalyzed')}</span>
+                <span className="text-xs text-[#a3a3a3]">{t('output', 'canBeAnalyzed')}</span>
               </div>
               <div className="flex items-start gap-1.5">
                 <AlertCircle size={13} className="text-red-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs text-[#a3a3a3]">{t('output')('cannotBeAnalyzed')}</span>
+                <span className="text-xs text-[#a3a3a3]">{t('output', 'cannotBeAnalyzed')}</span>
               </div>
             </div>
           </div>
@@ -78,7 +78,7 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <p className="text-xs font-medium text-green-500 mb-1.5">{t('output')('canAnalyze')}</p>
+            <p className="text-xs font-medium text-green-500 mb-1.5">{t('output', 'canAnalyze')}</p>
             <ul className="space-y-1">
               {canAnalyze.map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5 text-xs text-[#a3a3a3]">
@@ -89,7 +89,7 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
             </ul>
           </div>
           <div>
-            <p className="text-xs font-medium text-red-500 mb-1.5">{t('output')('cannotAnalyze')}</p>
+            <p className="text-xs font-medium text-red-500 mb-1.5">{t('output', 'cannotAnalyze')}</p>
             <ul className="space-y-1">
               {cannotAnalyze.map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5 text-xs text-[#a3a3a3]">
@@ -119,7 +119,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-[#2a2a2a] rounded-xl p-4 bg-[#141414]">
           <div className="flex items-center gap-2 mb-2">
             <FileText size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('productPositioning')}</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'productPositioning')}</span>
           </div>
           <p className="text-sm text-[#a3a3a3] leading-relaxed">{output.productPositioning}</p>
         </div>
@@ -129,7 +129,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-orange-500/30 rounded-xl p-4 bg-[#141414]">
           <div className="flex items-center gap-2 mb-2">
             <Zap size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('skuStrategy')}</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'skuStrategy')}</span>
           </div>
           <p className="text-sm text-[#a3a3a3] leading-relaxed whitespace-pre-wrap">{output.skuStrategy}</p>
         </div>
@@ -139,7 +139,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <FileText size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('listingDiagnosis')}</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'listingDiagnosis')}</span>
           </div>
           <div className="p-4">
             <ul className="space-y-2">
@@ -158,7 +158,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <Zap size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('optimizedTitle')}</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'optimizedTitle')}</span>
           </div>
           <div className="p-4 flex items-start justify-between gap-3">
             <p className="text-sm text-[#e5e5e5] leading-relaxed flex-1">{output.optimizedTitle}</p>
@@ -171,7 +171,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <FileText size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('sellingPoints')}</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'sellingPoints')}</span>
           </div>
           <div className="p-4">
             <ul className="space-y-2">
@@ -190,7 +190,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <ShoppingCart size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('bundle')}</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'bundle')}</span>
           </div>
           <div className="p-4 space-y-3">
             {output.bundleRecommendation.map((bundle, i) => (
@@ -217,7 +217,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <Search size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('seoKeywords')}</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'seoKeywords')}</span>
           </div>
           <div className="p-4">
             <div className="flex flex-wrap gap-2">
@@ -235,7 +235,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <FileText size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('contentIdeas')}</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'contentIdeas')}</span>
           </div>
           <div className="p-4">
             <ul className="space-y-2">
@@ -254,7 +254,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-orange-500/30 rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <AlertCircle size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('dataNeeded')}</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'dataNeeded')}</span>
           </div>
           <div className="p-4">
             <ul className="space-y-2">
@@ -273,7 +273,7 @@ function OutputSection({ output }: { output: AIOutput }) {
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <BarChart2 size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('dataMetrics')}</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'dataMetrics')}</span>
           </div>
           <div className="p-4 space-y-3">
             {output.dataMetrics.map((m, i) => (
@@ -329,7 +329,7 @@ function InputPanel({
       });
       const data = await res.json();
       if (!res.ok || data.error) {
-        setUrlFetchError(data.error || t('error')('fetchFailed'));
+        setUrlFetchError(data.error || t('error', 'fetchFailed'));
         return;
       }
       onChange({ ...product, ...data });
@@ -383,7 +383,7 @@ function InputPanel({
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 mb-4">
         <Package size={18} className="text-orange-500" />
-        <h2 className="text-sm font-semibold text-[#e5e5e5]">{t('input')('panelTitle')}</h2>
+        <h2 className="text-sm font-semibold text-[#e5e5e5]">{t('input', 'panelTitle')}</h2>
         <div className="ml-auto flex items-center gap-2">
           <div className="w-20 h-1.5 bg-[#2a2a2a] rounded-full overflow-hidden">
             <div
@@ -419,7 +419,7 @@ function InputPanel({
               className="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium flex items-center gap-2 transition-colors"
             >
               {urlLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
-              {urlLoading ? t('input')('fetching') : t('input')('fetch')}
+              {urlLoading ? t('input', 'fetching') : t('input', 'fetch')}
             </button>
           </div>
           {urlFetchError && <p className="text-xs text-red-500">{urlFetchError}</p>}
@@ -501,7 +501,7 @@ function InputPanel({
         {field('reviewSamples', 'reviewSamples', 'reviewSamplesPh', 'textarea')}
 
         <div className="pt-2 border-t border-[#2a2a2a] space-y-2">
-          <p className="text-xs font-medium text-[#737373] uppercase tracking-wide">{t('input')('scenarios')}</p>
+          <p className="text-xs font-medium text-[#737373] uppercase tracking-wide">{t('input', 'scenarios')}</p>
           <div className="grid grid-cols-1 gap-2">
             {DEMO_PRODUCTS.map((demo) => (
               <button
@@ -515,7 +515,7 @@ function InputPanel({
                 ) : (
                   <RotateCw size={12} />
                 )}
-                {t('demo')(demo.name as any)}
+                {t('demo', demo.name as any)}
               </button>
             ))}
           </div>
@@ -530,12 +530,12 @@ function InputPanel({
             {loading ? (
               <>
                 <Loader2 size={15} className="animate-spin" />
-                {t('input')('analyzing')}
+                {t('input', 'analyzing')}
               </>
             ) : (
               <>
                 <Zap size={15} />
-                {t('input')('runBtn')}
+                {t('input', 'runBtn')}
               </>
             )}
           </button>
@@ -812,13 +812,13 @@ export default function App() {
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        setError(data.error || t('error')('analyzeFailed'));
+        setError(data.error || t('error', 'analyzeFailed'));
         return;
       }
 
       setOutput(data as AIOutput);
     } catch (err: any) {
-      setError(err.message || t('error')('networkError'));
+      setError(err.message || t('error', 'networkError'));
     } finally {
       setLoading(false);
     }
