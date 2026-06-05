@@ -347,12 +347,12 @@ function InputPanel({
     type: 'text' | 'textarea' = 'text'
   ) => (
     <div className="space-y-1.5">
-      <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input')('fields')(labelKey)}</label>
+      <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input', 'fields', labelKey)}</label>
       {type === 'textarea' ? (
         <textarea
           value={product[key] as string}
           onChange={(e) => onChange({ ...product, [key]: e.target.value })}
-          placeholder={placeholderKey ? t('input')('fields')(placeholderKey) : ''}
+          placeholder={placeholderKey ? t('input', 'fields', placeholderKey) : ''}
           rows={2}
           className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] placeholder-[#525252] resize-none focus:border-orange-500 transition-colors"
         />
@@ -361,7 +361,7 @@ function InputPanel({
           type="text"
           value={product[key] as string}
           onChange={(e) => onChange({ ...product, [key]: e.target.value })}
-          placeholder={placeholderKey ? t('input')('fields')(placeholderKey) : ''}
+          placeholder={placeholderKey ? t('input', 'fields', placeholderKey) : ''}
           className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] placeholder-[#525252] focus:border-orange-500 transition-colors"
         />
       )}
@@ -404,13 +404,13 @@ function InputPanel({
         {field('description', 'description', 'descriptionPh', 'textarea')}
         {field('sellingPoints', 'currentSellingPoints', 'sellingPointsPh', 'textarea')}
         <div className="space-y-2">
-          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input')('fields')('productUrl')}</label>
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input', 'fields', 'productUrl')}</label>
           <div className="flex gap-2">
             <input
               type="url"
               value={fetchUrl}
               onChange={(e) => setFetchUrl(e.target.value)}
-              placeholder={t('input')('fields')('productUrlPh')}
+              placeholder={t('input', 'fields', 'productUrlPh')}
               className="flex-1 bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] placeholder-[#525252] focus:border-orange-500 transition-colors"
             />
             <button
@@ -426,7 +426,7 @@ function InputPanel({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input')('fields')('targetChannel')}</label>
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input', 'fields', 'targetChannel')}</label>
           <div className="grid grid-cols-3 gap-2">
             {CHANNELS.map((ch) => {
               const labelMap: Record<ProductInfo['channel'], keyof typeof I18N.input.channel> = {
@@ -444,7 +444,7 @@ function InputPanel({
                       : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
                   }`}
                 >
-                  {t('input')('channel')(labelMap[ch])}
+                  {t('input', 'channel', labelMap[ch])}
                 </button>
               );
             })}
@@ -452,7 +452,7 @@ function InputPanel({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input')('fields')('targetUser')}</label>
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input', 'fields', 'targetUser')}</label>
           <div className="grid grid-cols-2 gap-2">
             {TARGET_USERS.map((tu) => {
               const labelMap: Record<ProductInfo['targetUser'], keyof typeof I18N.input.targetUser> = {
@@ -471,7 +471,7 @@ function InputPanel({
                       : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
                   }`}
                 >
-                  {t('input')('targetUser')(labelMap[tu])}
+                  {t('input', 'targetUser', labelMap[tu])}
                 </button>
               );
             })}
@@ -479,7 +479,7 @@ function InputPanel({
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input')('fields')('productType')}</label>
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input', 'fields', 'productType')}</label>
           <div className="grid grid-cols-2 gap-2">
             {([true, false] as const).map((val) => (
               <button
@@ -491,7 +491,7 @@ function InputPanel({
                     : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
                 }`}
               >
-                {val ? t('input')('fields')('consumable') : t('input')('fields')('hardware')}
+                {val ? t('input', 'fields', 'consumable') : t('input', 'fields', 'hardware')}
               </button>
             ))}
           </div>
