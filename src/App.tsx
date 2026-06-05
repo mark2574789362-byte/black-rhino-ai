@@ -2,17 +2,19 @@ import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Zap, Package, Search, BarChart2, ShoppingCart, FileText,
-  Loader2, Copy, CheckCheck, RotateCw,
+  Loader2, Copy, CheckCheck, RotateCw, Languages,
   AlertCircle, CheckCircle2, Info
 } from 'lucide-react';
 import type { ProductInfo, AIOutput } from './types';
 import { DEMO_PRODUCTS } from './types';
+import { useLang, I18N, type Lang } from './i18n';
 
-const CHANNELS = ['Takealot', 'Independent Store', 'Both'] as const;
-const TARGET_USERS = ['Home User', 'Small Business', 'Warehouse/Retail', 'All'] as const;
+const CHANNELS: Array<ProductInfo['channel']> = ['Takealot', 'Independent Store', 'Both'];
+const TARGET_USERS: Array<ProductInfo['targetUser']> = ['Home User', 'Small Business', 'Warehouse/Retail', 'All'];
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
+  const { t } = useLang();
   const handleCopy = () => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -24,7 +26,7 @@ function CopyButton({ text }: { text: string }) {
       className="inline-flex items-center gap-1 text-xs text-[#737373] hover:text-orange-500 transition-colors"
     >
       {copied ? <CheckCheck size={12} /> : <Copy size={12} />}
-      {copied ? 'Copied' : 'Copy'}
+      {copied ? t('output')('copied') : t('output')('copy')}
     </button>
   );
 }
@@ -34,12 +36,13 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
   canAnalyze: string[];
   cannotAnalyze: string[];
 }) {
+  const { t } = useLang();
   const scoreColor = score >= 70 ? '#22c55e' : score >= 40 ? '#eab308' : '#ef4444';
   return (
     <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
       <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
         <Info size={16} className="text-orange-500" />
-        <span className="text-sm font-medium text-[#e5e5e5]">Data Sufficiency Score</span>
+        <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('dataSufficiency')}</span>
       </div>
       <div className="p-4">
         <div className="flex items-center gap-4 mb-4">
@@ -59,15 +62,15 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
             </span>
           </div>
           <div className="flex-1">
-            <div className="text-xs text-[#737373] mb-2">This assessment is based only on public product information. Backend data (sales, inventory, margin) is not accessed.</div>
+            <div className="text-xs text-[#737373] mb-2">{t('output')('dataSufficiencyNote')}</div>
             <div className="grid grid-cols-2 gap-2">
               <div className="flex items-start gap-1.5">
                 <CheckCircle2 size={13} className="text-green-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs text-[#a3a3a3]">Can be analyzed</span>
+                <span className="text-xs text-[#a3a3a3]">{t('output')('canBeAnalyzed')}</span>
               </div>
               <div className="flex items-start gap-1.5">
                 <AlertCircle size={13} className="text-red-500 mt-0.5 flex-shrink-0" />
-                <span className="text-xs text-[#a3a3a3]">Cannot be analyzed</span>
+                <span className="text-xs text-[#a3a3a3]">{t('output')('cannotBeAnalyzed')}</span>
               </div>
             </div>
           </div>
@@ -75,7 +78,7 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <p className="text-xs font-medium text-green-500 mb-1.5">Can Analyze</p>
+            <p className="text-xs font-medium text-green-500 mb-1.5">{t('output')('canAnalyze')}</p>
             <ul className="space-y-1">
               {canAnalyze.map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5 text-xs text-[#a3a3a3]">
@@ -86,7 +89,7 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
             </ul>
           </div>
           <div>
-            <p className="text-xs font-medium text-red-500 mb-1.5">Cannot Analyze</p>
+            <p className="text-xs font-medium text-red-500 mb-1.5">{t('output')('cannotAnalyze')}</p>
             <ul className="space-y-1">
               {cannotAnalyze.map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5 text-xs text-[#a3a3a3]">
@@ -103,43 +106,40 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
 }
 
 function OutputSection({ output }: { output: AIOutput }) {
+  const { t } = useLang();
   return (
     <div className="space-y-3">
-      {/* Data Sufficiency Score */}
       <DataSufficiencyCard
         score={output.dataSufficiencyScore}
         canAnalyze={output.canAnalyze}
         cannotAnalyze={output.cannotAnalyze}
       />
 
-      {/* Product Positioning */}
       {output.productPositioning && (
         <div className="border border-[#2a2a2a] rounded-xl p-4 bg-[#141414]">
           <div className="flex items-center gap-2 mb-2">
             <FileText size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">Product Positioning</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('productPositioning')}</span>
           </div>
           <p className="text-sm text-[#a3a3a3] leading-relaxed">{output.productPositioning}</p>
         </div>
       )}
 
-      {/* SKU Operation Strategy */}
       {output.skuStrategy && (
         <div className="border border-orange-500/30 rounded-xl p-4 bg-[#141414]">
           <div className="flex items-center gap-2 mb-2">
             <Zap size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">SKU Operation Strategy</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('skuStrategy')}</span>
           </div>
           <p className="text-sm text-[#a3a3a3] leading-relaxed whitespace-pre-wrap">{output.skuStrategy}</p>
         </div>
       )}
 
-      {/* Listing Diagnosis */}
       {output.listingDiagnosis.length > 0 && (
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <FileText size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">Listing Diagnosis</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('listingDiagnosis')}</span>
           </div>
           <div className="p-4">
             <ul className="space-y-2">
@@ -154,12 +154,11 @@ function OutputSection({ output }: { output: AIOutput }) {
         </div>
       )}
 
-      {/* Optimized Title */}
       {output.optimizedTitle && (
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <Zap size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">Optimized Product Title</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('optimizedTitle')}</span>
           </div>
           <div className="p-4 flex items-start justify-between gap-3">
             <p className="text-sm text-[#e5e5e5] leading-relaxed flex-1">{output.optimizedTitle}</p>
@@ -168,12 +167,11 @@ function OutputSection({ output }: { output: AIOutput }) {
         </div>
       )}
 
-      {/* Selling Points */}
       {output.sellingPoints.length > 0 && (
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <FileText size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">Five Key Selling Points</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('sellingPoints')}</span>
           </div>
           <div className="p-4">
             <ul className="space-y-2">
@@ -188,12 +186,11 @@ function OutputSection({ output }: { output: AIOutput }) {
         </div>
       )}
 
-      {/* Bundle */}
       {output.bundleRecommendation.length > 0 && (
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <ShoppingCart size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">Bundle Recommendation</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('bundle')}</span>
           </div>
           <div className="p-4 space-y-3">
             {output.bundleRecommendation.map((bundle, i) => (
@@ -216,12 +213,11 @@ function OutputSection({ output }: { output: AIOutput }) {
         </div>
       )}
 
-      {/* SEO Keywords */}
       {output.seoKeywords.length > 0 && (
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <Search size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">SEO Keywords</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('seoKeywords')}</span>
           </div>
           <div className="p-4">
             <div className="flex flex-wrap gap-2">
@@ -235,12 +231,11 @@ function OutputSection({ output }: { output: AIOutput }) {
         </div>
       )}
 
-      {/* Content Ideas */}
       {output.contentIdeas.length > 0 && (
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <FileText size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">Content Ideas</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('contentIdeas')}</span>
           </div>
           <div className="p-4">
             <ul className="space-y-2">
@@ -255,12 +250,11 @@ function OutputSection({ output }: { output: AIOutput }) {
         </div>
       )}
 
-      {/* Data Needed */}
       {output.dataNeeded.length > 0 && (
         <div className="border border-orange-500/30 rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <AlertCircle size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">If Internal Data Is Available</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('dataNeeded')}</span>
           </div>
           <div className="p-4">
             <ul className="space-y-2">
@@ -275,12 +269,11 @@ function OutputSection({ output }: { output: AIOutput }) {
         </div>
       )}
 
-      {/* Data Metrics */}
       {output.dataMetrics.length > 0 && (
         <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
           <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
             <BarChart2 size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">Data Validation Metrics</span>
+            <span className="text-sm font-medium text-[#e5e5e5]">{t('output')('dataMetrics')}</span>
           </div>
           <div className="p-4 space-y-3">
             {output.dataMetrics.map((m, i) => (
@@ -319,10 +312,10 @@ function InputPanel({
   loading: boolean;
   demoLoading: string;
 }) {
+  const { t } = useLang();
   const [fetchUrl, setFetchUrl] = useState('');
   const [urlLoading, setUrlLoading] = useState(false);
   const [urlFetchError, setUrlFetchError] = useState<string | null>(null);
-
 
   const handleUrlFetch = async () => {
     if (!fetchUrl) return;
@@ -336,7 +329,7 @@ function InputPanel({
       });
       const data = await res.json();
       if (!res.ok || data.error) {
-        setUrlFetchError(data.error || 'Failed to fetch');
+        setUrlFetchError(data.error || t('error')('fetchFailed'));
         return;
       }
       onChange({ ...product, ...data });
@@ -348,18 +341,18 @@ function InputPanel({
   };
 
   const field = (
-    label: string,
+    labelKey: keyof typeof I18N.input.fields,
     key: keyof ProductInfo,
-    placeholder = '',
+    placeholderKey?: keyof typeof I18N.input.fields,
     type: 'text' | 'textarea' = 'text'
   ) => (
     <div className="space-y-1.5">
-      <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{label}</label>
+      <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input')('fields')[labelKey]}</label>
       {type === 'textarea' ? (
         <textarea
           value={product[key] as string}
           onChange={(e) => onChange({ ...product, [key]: e.target.value })}
-          placeholder={placeholder}
+          placeholder={placeholderKey ? t('input')('fields')[placeholderKey] : ''}
           rows={2}
           className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] placeholder-[#525252] resize-none focus:border-orange-500 transition-colors"
         />
@@ -368,14 +361,13 @@ function InputPanel({
           type="text"
           value={product[key] as string}
           onChange={(e) => onChange({ ...product, [key]: e.target.value })}
-          placeholder={placeholder}
+          placeholder={placeholderKey ? t('input')('fields')[placeholderKey] : ''}
           className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] placeholder-[#525252] focus:border-orange-500 transition-colors"
         />
       )}
     </div>
   );
 
-  // Check which fields are filled
   const filledCount = [
     product.productName,
     product.brand,
@@ -391,7 +383,7 @@ function InputPanel({
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 mb-4">
         <Package size={18} className="text-orange-500" />
-        <h2 className="text-sm font-semibold text-[#e5e5e5]">Product Information</h2>
+        <h2 className="text-sm font-semibold text-[#e5e5e5]">{t('input')('panelTitle')}</h2>
         <div className="ml-auto flex items-center gap-2">
           <div className="w-20 h-1.5 bg-[#2a2a2a] rounded-full overflow-hidden">
             <div
@@ -404,21 +396,21 @@ function InputPanel({
       </div>
 
       <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-        {field('Product Name *', 'productName', 'e.g. Niimbot B21 Label Printer')}
-        {field('Brand', 'brand', 'e.g. Niimbot')}
-        {field('Category', 'category', 'e.g. Business Label Printer')}
-        {field('Price (ZAR)', 'price', 'e.g. 899 ZAR')}
-        {field('Current Title', 'currentTitle', 'Paste current product title here')}
-        {field('Description', 'description', 'Product description...', 'textarea')}
-        {field('Current Selling Points', 'currentSellingPoints', 'e.g. Portable, Thermal, Free Tape', 'textarea')}
+        {field('productName', 'productName', 'productNamePh')}
+        {field('brand', 'brand', 'brandPh')}
+        {field('category', 'category', 'categoryPh')}
+        {field('price', 'price', 'pricePh')}
+        {field('currentTitle', 'currentTitle', 'currentTitlePh')}
+        {field('description', 'description', 'descriptionPh', 'textarea')}
+        {field('sellingPoints', 'currentSellingPoints', 'sellingPointsPh', 'textarea')}
         <div className="space-y-2">
-          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Product URL</label>
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input')('fields').productUrl}</label>
           <div className="flex gap-2">
             <input
               type="url"
               value={fetchUrl}
               onChange={(e) => setFetchUrl(e.target.value)}
-              placeholder="Paste product URL to auto-fill..."
+              placeholder={t('input')('fields').productUrlPh}
               className="flex-1 bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] placeholder-[#525252] focus:border-orange-500 transition-colors"
             />
             <button
@@ -427,52 +419,67 @@ function InputPanel({
               className="px-4 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 disabled:opacity-40 text-white text-sm font-medium flex items-center gap-2 transition-colors"
             >
               {urlLoading ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
-              {urlLoading ? 'Fetching...' : 'Fetch'}
+              {urlLoading ? t('input')('fetching') : t('input')('fetch')}
             </button>
           </div>
           {urlFetchError && <p className="text-xs text-red-500">{urlFetchError}</p>}
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Target Channel</label>
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input')('fields').targetChannel}</label>
           <div className="grid grid-cols-3 gap-2">
-            {CHANNELS.map((ch) => (
-              <button
-                key={ch}
-                onClick={() => onChange({ ...product, channel: ch })}
-                className={`text-xs py-2 rounded-lg border transition-colors ${
-                  product.channel === ch
-                    ? 'border-orange-500 bg-orange-500/10 text-orange-500'
-                    : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
-                }`}
-              >
-                {ch}
-              </button>
-            ))}
+            {CHANNELS.map((ch) => {
+              const labelMap: Record<ProductInfo['channel'], keyof typeof I18N.input.channel> = {
+                'Takealot': 'Takealot',
+                'Independent Store': 'Independent',
+                'Both': 'Both',
+              };
+              return (
+                <button
+                  key={ch}
+                  onClick={() => onChange({ ...product, channel: ch })}
+                  className={`text-xs py-2 rounded-lg border transition-colors ${
+                    product.channel === ch
+                      ? 'border-orange-500 bg-orange-500/10 text-orange-500'
+                      : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
+                  }`}
+                >
+                  {t('input')('channel')[labelMap[ch]]}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Target User</label>
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input')('fields').targetUser}</label>
           <div className="grid grid-cols-2 gap-2">
-            {TARGET_USERS.map((tu) => (
-              <button
-                key={tu}
-                onClick={() => onChange({ ...product, targetUser: tu })}
-                className={`text-xs py-2 rounded-lg border transition-colors ${
-                  product.targetUser === tu
-                    ? 'border-orange-500 bg-orange-500/10 text-orange-500'
-                    : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
-                }`}
-              >
-                {tu}
-              </button>
-            ))}
+            {TARGET_USERS.map((tu) => {
+              const labelMap: Record<ProductInfo['targetUser'], keyof typeof I18N.input.targetUser> = {
+                'Home User': 'HomeUser',
+                'Small Business': 'SmallBusiness',
+                'Warehouse/Retail': 'Warehouse',
+                'All': 'All',
+              };
+              return (
+                <button
+                  key={tu}
+                  onClick={() => onChange({ ...product, targetUser: tu })}
+                  className={`text-xs py-2 rounded-lg border transition-colors ${
+                    product.targetUser === tu
+                      ? 'border-orange-500 bg-orange-500/10 text-orange-500'
+                      : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
+                  }`}
+                >
+                  {t('input')('targetUser')[labelMap[tu]]}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">Product Type</label>
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input')('fields').productType}</label>
           <div className="grid grid-cols-2 gap-2">
             {([true, false] as const).map((val) => (
               <button
@@ -484,18 +491,17 @@ function InputPanel({
                     : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
                 }`}
               >
-                {val ? 'Consumable (labels, ink...)' : 'Hardware (device, equipment)'}
+                {val ? t('input')('fields').consumable : t('input')('fields').hardware}
               </button>
             ))}
           </div>
         </div>
 
-        {field('Related Products', 'relatedProducts', 'e.g. Series B Labels, Transparent Labels', 'textarea')}
-        {field('Review Samples', 'reviewSamples', 'Paste customer reviews here...', 'textarea')}
+        {field('relatedProducts', 'relatedProducts', 'relatedProductsPh', 'textarea')}
+        {field('reviewSamples', 'reviewSamples', 'reviewSamplesPh', 'textarea')}
 
-        {/* Demo Buttons */}
         <div className="pt-2 border-t border-[#2a2a2a] space-y-2">
-          <p className="text-xs font-medium text-[#737373] uppercase tracking-wide">Business Scenarios</p>
+          <p className="text-xs font-medium text-[#737373] uppercase tracking-wide">{t('input')('scenarios')}</p>
           <div className="grid grid-cols-1 gap-2">
             {DEMO_PRODUCTS.map((demo) => (
               <button
@@ -509,7 +515,7 @@ function InputPanel({
                 ) : (
                   <RotateCw size={12} />
                 )}
-                {demo.name}
+                {t('demo')(demo.name as any)}
               </button>
             ))}
           </div>
@@ -524,12 +530,12 @@ function InputPanel({
             {loading ? (
               <>
                 <Loader2 size={15} className="animate-spin" />
-                Analyzing...
+                {t('input')('analyzing')}
               </>
             ) : (
               <>
                 <Zap size={15} />
-                Run SKU Diagnosis
+                {t('input')('runBtn')}
               </>
             )}
           </button>
@@ -539,7 +545,23 @@ function InputPanel({
   );
 }
 
+function LangSwitcher() {
+  const { lang, setLang } = useLang();
+  const next: Lang = lang === 'zh' ? 'en' : 'zh';
+  return (
+    <button
+      onClick={() => setLang(next)}
+      className="text-xs text-[#737373] hover:text-orange-500 transition-colors flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-[#2a2a2a] hover:border-orange-500/50"
+      title={lang === 'zh' ? '切换到英文' : 'Switch to Chinese'}
+    >
+      <Languages size={13} />
+      <span className="font-medium">{lang === 'zh' ? '中文' : 'EN'}</span>
+    </button>
+  );
+}
+
 export default function App() {
+  const { t, tr } = useLang();
   const EMPTY_PRODUCT = (): ProductInfo => ({
     productName: '', brand: '', category: '', price: '',
     currentTitle: '', description: '', currentSellingPoints: '',
@@ -558,7 +580,6 @@ export default function App() {
     setDemoLoading(demoProduct.productName);
     setProduct(demoProduct);
 
-    // Rule-based output for demo (no API call)
     await new Promise(r => setTimeout(r, 800));
 
     const isConsumable = demoProduct.consumable;
@@ -720,7 +741,6 @@ export default function App() {
         skuStrategy: 'This 3C SKU operates in a crowded competitive space. Priority: (1) Differentiate via use-case scenarios, not raw specs, (2) Build bundle offers to raise AOV, (3) Monitor category rank and review sentiment, (4) Test price elasticity before discounting.',
       };
     } else {
-      // Default: Niimbot B21 style
       demoOutput = {
         status: 'partial',
         dataSufficiencyScore: 72,
@@ -792,13 +812,13 @@ export default function App() {
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        setError(data.error || 'Analysis failed. Please try again.');
+        setError(data.error || t('error')('analyzeFailed'));
         return;
       }
 
       setOutput(data as AIOutput);
     } catch (err: any) {
-      setError(err.message || 'Network error. Please check your connection.');
+      setError(err.message || t('error')('networkError'));
     } finally {
       setLoading(false);
     }
@@ -814,17 +834,20 @@ export default function App() {
               <span className="text-white font-bold text-sm">BR</span>
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-[#e5e5e5]">Black Rhino AI 商品运营诊断助手</h1>
-              <p className="text-xs text-[#737373]">Product Operations Assistant · Powered by AI Workflow</p>
+              <h1 className="text-sm font-semibold text-[#e5e5e5]">{tr(I18N.header.title)}</h1>
+              <p className="text-xs text-[#737373]">{tr(I18N.header.subtitle)}</p>
             </div>
           </div>
-          <button
-            onClick={() => setShowPrompt(!showPrompt)}
-            className="text-xs text-[#737373] hover:text-orange-500 transition-colors flex items-center gap-1.5"
-          >
-            <FileText size={13} />
-            {showPrompt ? 'Hide' : 'Show'} Prompt Template
-          </button>
+          <div className="flex items-center gap-2">
+            <LangSwitcher />
+            <button
+              onClick={() => setShowPrompt(!showPrompt)}
+              className="text-xs text-[#737373] hover:text-orange-500 transition-colors flex items-center gap-1.5"
+            >
+              <FileText size={13} />
+              {showPrompt ? tr(I18N.header.hidePrompt) : tr(I18N.header.showPrompt)}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -838,7 +861,7 @@ export default function App() {
             className="border-b border-[#1a1a1a] overflow-hidden"
           >
             <div className="max-w-7xl mx-auto px-6 py-3">
-              <p className="text-xs text-[#737373] mb-2 font-medium">Standardized AI Prompt — sent to MiniMax API on each diagnosis</p>
+              <p className="text-xs text-[#737373] mb-2 font-medium">{tr(I18N.promptPreview.title)}</p>
               <pre className="text-xs text-[#a3a3a3] bg-[#141414] rounded-lg p-3 overflow-x-auto whitespace-pre-wrap leading-relaxed max-h-48 overflow-y-auto">
 {`You are an AI e-commerce operations assistant for Black Rhino South Africa.
 
@@ -859,7 +882,7 @@ Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], produ
       {/* Disclaimer Banner */}
       <div className="bg-orange-500/5 border-b border-orange-500/20 px-6 py-2">
         <p className="max-w-7xl mx-auto text-xs text-[#a3a3a3] text-center">
-          <span className="text-orange-500 font-medium">Data Boundary:</span> This tool does not access Black Rhino backend data. It cannot determine real sales, margin, inventory, or ad ROI. Those require internal data access.
+          <span className="text-orange-500 font-medium">{tr(I18N.banner.prefix)}</span> {tr(I18N.banner.text)}
         </p>
       </div>
 
@@ -887,20 +910,26 @@ Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], produ
                 <div className="border border-red-500/30 rounded-xl p-4 bg-[#141414]">
                   <div className="flex items-center gap-2 mb-2">
                     <AlertCircle size={16} className="text-red-500" />
-                    <span className="text-sm font-medium text-red-500">Error</span>
+                    <span className="text-sm font-medium text-red-500">{tr(I18N.error.title)}</span>
                   </div>
                   <p className="text-sm text-[#a3a3a3]">{error}</p>
                 </div>
               ) : output ? (
-                <OutputSection output={output} />
+                <>
+                  <div className="mb-3 flex items-center gap-2 text-xs text-[#737373]">
+                    <Info size={13} className="text-orange-500" />
+                    <span>AI 诊断输出原文（English） · 切换中英文仅影响界面语言，AI 输出内容保持英文不变</span>
+                  </div>
+                  <OutputSection output={output} />
+                </>
               ) : (
                 <div className="h-full flex flex-col items-center justify-center text-center border border-dashed border-[#2a2a2a] rounded-2xl">
                   <div className="w-14 h-14 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mb-4">
                     <BarChart2 size={24} className="text-[#525252]" />
                   </div>
-                  <h3 className="text-sm font-medium text-[#525252] mb-1">Ready to diagnose</h3>
+                  <h3 className="text-sm font-medium text-[#525252] mb-1">{tr(I18N.empty.title)}</h3>
                   <p className="text-xs text-[#3a3a3a] max-w-xs">
-                    Fill in product information and click <span className="text-orange-500">Run SKU Diagnosis</span>, or load one of the 3 demo products above.
+                    {tr(I18N.empty.desc)}
                   </p>
                 </div>
               )}
@@ -912,8 +941,8 @@ Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], produ
       {/* Footer */}
       <footer className="border-t border-[#1a1a1a] px-6 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between text-xs text-[#525252]">
-          <span>Black Rhino AI 商品运营诊断助手 · Demo v0.2</span>
-          <span>Powered by MiniMax API · No backend sales data accessed</span>
+          <span>{tr(I18N.footer.product)}</span>
+          <span>{tr(I18N.footer.powered)}</span>
         </div>
       </footer>
     </div>
