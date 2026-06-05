@@ -6,8 +6,211 @@ import {
   AlertCircle, CheckCircle2, Info
 } from 'lucide-react';
 import type { ProductInfo, AIOutput } from './types';
-import { DEMO_PRODUCTS } from './types';
+import { DEMO_PRODUCTS, DEMO_OUTPUTS_EN } from './types';
 import { useLang, I18N, type Lang } from './i18n';
+
+// 中文版 Demo 输出（顺序与 DEMO_OUTPUTS_EN 对齐）
+const DEMO_OUTPUTS_ZH: AIOutput[] = [
+  {
+    status: 'partial',
+    dataSufficiencyScore: 68,
+    canAnalyze: ['商品定位与目标用户画像', 'Listing 优化方向', 'B2B 买家的捆绑销售机会'],
+    cannotAnalyze: ['真实销售速度与周转率', 'SKU 毛利率', '客户复购率'],
+    productPositioning: '面向南非仓储、零售与物流场景的专业级设备，电商扩张带动条码应用增长为该市场提供机会。',
+    listingDiagnosis: [
+      '标题缺少“仓库”、“物流”、“零售”等 B2B 行业关键词',
+      '卖点未体现高强度与高吞吐量的工业级性能',
+      '缺少兼容性矩阵（哪些 POS/仓库系统可对接）',
+    ],
+    optimizedTitle: '工业级条码打印机 · 适用于仓库、零售与物流场景 | 高速热转印',
+    sellingPoints: [
+      '最快 6ips 打印 4x6 快递面单，满足高峰出库需求',
+      '支持热敏与热转印双模式，适配不同面单材料',
+      '兼容主流快递与仓库管理系统，即插即用',
+      '金属机身专为连续高强度作业设计',
+      '提供 USB、串口与以太网多接口，灵活集成',
+    ],
+    bundleRecommendation: [{
+      name: '仓库启航套餐',
+      items: ['工业级条码打印机', '4x6 热敏面单 (1000 卷)', '高端蜡基碳带', '标签设计软件'],
+      purpose: '降低 B2B 客户首购门槛，附赠软件提升感知价值与减少退货',
+    }],
+    seoKeywords: [
+      'barcode printer south africa',
+      'warehouse label printer',
+      'industrial thermal printer',
+      'shipping label printer',
+      'retail barcode scanner',
+      'logistics labeling solution',
+      '4x6 label printer',
+      'thermal transfer printer',
+    ],
+    contentIdeas: [
+      '如何为南非仓库选择合适的条码打印机',
+      '条码标签入门：南非小型商家实用指南',
+      '5000 兰特以下，5 个仓库效率升级方案',
+    ],
+    dataNeeded: ['各 SKU 月销售速度', '产品线毛利率', '类目退货率与不良率'],
+    dataMetrics: [
+      { metric: 'B2B 报价请求率', reason: '跟踪 B2B 渠道需求', nextAction: '报价高但成交低时，需重新审视 B2B 定价策略' },
+      { metric: '客户标签采购量', reason: '反映耗材复购潜力', nextAction: '采购量下滑时，启动复购提醒邮件序列' },
+      { metric: '商品退货率', reason: '高退货率意味着 Listing 描述与实物不匹配', nextAction: '退货率高时，检查描述准确性与图片还原度' },
+    ],
+    skuStrategy: '该硬件 SKU 作为切入点拉动标签复购。优先级：(1) 优化 Listing 首单转化率；(2) 加入耗材套餐提升客单价；(3) 跟踪标签连带率；(4) 为耗材建立 60 天复购邮件序列。',
+  },
+  {
+    status: 'full',
+    dataSufficiencyScore: 82,
+    canAnalyze: ['复购潜力与生命周期价值', '与兼容硬件的套餐机会', 'SEO 关键词与内容方向'],
+    cannotAnalyze: ['CRM 中的实际复购率', '库存周转天数', '各渠道获客成本'],
+    productPositioning: '高使用频率耗材，通过复购带来持续现金流，面向小型商家与个人用户的标签打印机用户。',
+    listingDiagnosis: [
+      '标题未强调与具体打印机型号的兼容性',
+      '缺少“批量购买”或订阅选项',
+      '缺少针对特定行业（电商卖家、零售商）的使用场景语言',
+    ],
+    optimizedTitle: 'Niimbot B 系列标签纸 50x30mm — 适配 B21/B1/B3S | 高质量热敏标签（白色）',
+    sellingPoints: [
+      '适配 Niimbot B21、B1、B3S，再也不用担心买错标签',
+      '优质热敏纸面，打印清晰不晕染',
+      '强粘性背胶，在南非气候下也能牢牢贴合',
+      '易撕背胶设计，高频贴标场景下依然顺畅',
+      '白、透明、彩色多色可选，满足不同贴标需求',
+    ],
+    bundleRecommendation: [
+      {
+        name: '小型商家标签组合包',
+        items: ['Niimbot B 系列标签 (5 卷)', '线缆标签 (1 卷)', '透明标签 (1 卷)'],
+        purpose: '验证多卷套餐能否提升客单价',
+      },
+      {
+        name: '自动补货计划',
+        items: ['每月标签订阅', '复购订单享 9 折', '所有订阅免运费'],
+        purpose: '锁定持续收入并减少流失——标签天然适合订阅',
+      },
+    ],
+    seoKeywords: [
+      'niimbot labels south africa',
+      'thermal label rolls 50x30mm',
+      'label printer consumables',
+      'buy labels online south africa',
+      'small business labeling supplies',
+      'label printer paper',
+      'ecommerce shipping labels',
+      'storage organization labels',
+    ],
+    contentIdeas: [
+      '如何用热敏标签整理你的小型商家库存',
+      '电商卖家最容易犯的 10 个贴标错误（附解决办法）',
+      '南非家庭主妇都在怎么用标签打印机',
+    ],
+    dataNeeded: ['当前月复购率（按客户）', '耗材平均购买频次', '仅购买一次耗材的客户流失率'],
+    dataMetrics: [
+      { metric: '复购率', reason: '耗材品类的核心健康指标', nextAction: '60-90 天内跟踪复购以验证耗材留存' },
+      { metric: '耗材与硬件比例', reason: '高比例意味着耗材生态健康', nextAction: '比例偏低时，分析硬件买家为何不转化为耗材' },
+      { metric: '客户 LTV', reason: '按渠道跟踪 LTV 优化广告投入', nextAction: '依据 LTV 数据决定加码或缩减广告渠道' },
+    ],
+    skuStrategy: '该耗材 SKU 是品类的 LTV 核心。优先级：(1) 以组合包推动首单试用；(2) 转化为订阅或自动补货；(3) 按客户分层跟踪复购率；(4) 监控硬件买家的耗材连带率。',
+  },
+  {
+    status: 'partial',
+    dataSufficiencyScore: 65,
+    canAnalyze: ['商品定位 vs 竞品', '场景化卖点机会', '交叉销售与升级销售潜力'],
+    cannotAnalyze: ['与 Anker 等竞品的真实市占率', '各流量来源的实际转化率', '客户人口统计数据'],
+    productPositioning: '面向南非高性价比消费者的高性价比 3C 配件品牌，无需为品牌溢价付费即可获得可靠性能。',
+    listingDiagnosis: [
+      '标题纯参数驱动——缺少情感钩子与场景描述',
+      '卖点与 Anker、三星等成熟品牌直接比拼参数',
+      '缺少使用场景与“适合学生党”、“适合南非限电充电” 等社交背书元素',
+    ],
+    optimizedTitle: 'Baseus 20000mAh 充电宝 65W — 为笔记本与手机快速充电 | 南非便携电源',
+    sellingPoints: [
+      '65W 输出可通过 USB-C 为多数笔记本充电——在南非随时办公',
+      '20000mAh 真实容量，可为 iPhone 14 Pro 充电 4 次以上或三星 S23 Ultra 3 次以上',
+      '双接口输出（USB-C + USB-A），同时充两台设备',
+      '内置 LED 显示屏，剩余电量一目了然',
+      '通过安全认证——具备过充、过流、短路保护',
+    ],
+    bundleRecommendation: [{
+      name: '学生与远程工作者套餐',
+      items: ['Baseus 20000mAh 充电宝', 'USB-C to USB-C 数据线 (1m)', '便携收纳袋'],
+      purpose: '有望在客户接受配件套餐后提升客单价',
+    }],
+    seoKeywords: [
+      'power bank south africa',
+      '20000mah power bank',
+      'fast charging power bank',
+      'usb c power bank',
+      'laptop charger portable',
+      'load shedding power bank',
+      'south africa electronics',
+      'portable charger travel',
+    ],
+    contentIdeas: [
+      '南非限电期最佳便携充电宝推荐（2025 版）',
+      '如何为手机、平板、笔记本挑选合适的充电宝',
+      '南非公路旅行必备：只需要这一款充电宝',
+    ],
+    dataNeeded: ['Takealot 类目销售排名', '用户评价中各特性的情感分数', '流量来源构成（自然/付费/Takealot 内部）'],
+    dataMetrics: [
+      { metric: '类目销售排名', reason: '跟踪与 Anker 等品牌在类目中的位置', nextAction: '排名下滑时，检查竞品定价并调整套餐' },
+      { metric: '评价情感分数', reason: '汇总评论情感，了解哪些特性受用户认可', nextAction: '依据情感分布决定下一轮 Listing 优化重点' },
+      { metric: '加购 vs 成交率', reason: '高加购但低成交意味着价格或评价有问题', nextAction: '高加购低成交时，优化价格或重点解决评价疑虑' },
+    ],
+    skuStrategy: '该 3C SKU 处于竞争红海。优先级：(1) 用场景化差异点取代纯参数比拼；(2) 通过套餐提高客单价；(3) 监控类目排名与评价情感；(4) 折扣前先测试价格弹性。',
+  },
+  {
+    status: 'partial',
+    dataSufficiencyScore: 72,
+    canAnalyze: ['面向小型商家与个人用户的产品定位', 'Listing 优化方向（标题、要点）', '套餐与配件交叉销售机会'],
+    cannotAnalyze: ['真实点击率与转化率', '客户购买旅程与流失点', '库存周转与断货频率'],
+    productPositioning: '面向南非小型商家、家庭收纳用户与零售商的便携标签打印机，差异化在便携、易用与免墨水。',
+    listingDiagnosis: [
+      '标题偏参数（“便携”）未提示使用场景（“小型商家贴标”、“家庭收纳”）',
+      '卖点仍是泛化的热敏打印机优势，缺少南非本地化场景',
+      '缺少社交背书——满意客户数、兼容标签范围、打印速度参考',
+    ],
+    optimizedTitle: 'Niimbot B21 便携标签打印机 — 小型商家、家庭与零售场景首选 | 蓝牙连接，无需墨水',
+    sellingPoints: [
+      '在家、店内、仓库都能打出专业标签——无需墨水或碳粉',
+      '蓝牙连接，3 分钟完成配置，手机或笔记本直接使用',
+      '兼容 Niimbot B 系列多尺寸标签（40x30mm、50x30mm 及自定义尺寸）',
+      '仅 190g 超轻便携——市场、临时店、仓库随身携带',
+      '官方应用免费提供 100+ 模板，专为南非小型商家设计',
+    ],
+    bundleRecommendation: [
+      {
+        name: '小型商家启航套件',
+        items: ['Niimbot B21 打印机', 'B 系列标签 (2 卷: 50x30mm)', '透明标签 (1 卷)', '线缆标签 (1 卷)'],
+        purpose: '有望通过配件套餐提高客单价',
+      },
+    ],
+    seoKeywords: [
+      'label printer south africa',
+      'portable label printer',
+      'thermal label printer small business',
+      'bluetooth label printer',
+      'home organization labels',
+      'price tag printer',
+      'retail labeling solution',
+      'niimbot south africa',
+    ],
+    contentIdeas: [
+      '如何用标签打印机一步到位整理小型商家库存',
+      '南非小型商家老板节省时间的 10 种标签机玩法',
+      'Niimbot B21 评测：2025 年南非小型商家的最佳入门标签机',
+    ],
+    dataNeeded: ['各 Listing 变体的周点击率', '加购率与弃购原因', '各 SKU 尺寸/颜色变体的库存周转'],
+    dataMetrics: [
+      { metric: '点击率（CTR）', reason: '衡量标题与主图在类目中的吸引力', nextAction: 'CTR 低时，测试不同标题与主图' },
+      { metric: '加购率', reason: '高 CTR 低加购 = Listing 图片或评价问题', nextAction: 'CTR 良好但加购低时，检查 Listing 图片与评价' },
+      { metric: '套餐连带率', reason: '衡量多少硬件买家顺手加购标签', nextAction: '连带率低时，测试套餐折扣或结账页自动推荐' },
+      { metric: '标签复购率', reason: '耗材业务模式的关键指标——60 天内复购', nextAction: '复购率低时，为流失客户设置自动补货提醒' },
+    ],
+    skuStrategy: '该硬件 SKU 吸引多个买家细分市场。优先级：(1) 以清晰的场景文案拿下首单转化；(2) 推动套餐与配件交叉销售；(3) 按细分市场跟踪加购率与转化率；(4) 将硬件买家转化为标签耗材复购者。',
+  },
+];
+
 
 const CHANNELS: Array<ProductInfo['channel']> = ['Takealot', 'Independent Store', 'Both'];
 const TARGET_USERS: Array<ProductInfo['targetUser']> = ['Home User', 'Small Business', 'Warehouse/Retail', 'All'];
@@ -582,220 +785,22 @@ export default function App() {
 
     await new Promise(r => setTimeout(r, 800));
 
+    // 演示输出根据当前语言选版本
     const isConsumable = demoProduct.consumable;
     const isLabelPrinter = demoProduct.category.toLowerCase().includes('label printer') || demoProduct.category.toLowerCase().includes('printer');
     const isBaseus = demoProduct.brand.toLowerCase().includes('baseus');
     const isBarcode = demoProduct.category.toLowerCase().includes('barcode') || demoProduct.category.toLowerCase().includes('warehouse');
 
+    const all: AIOutput[] = lang === 'zh' ? DEMO_OUTPUTS_ZH : DEMO_OUTPUTS_EN;
     let demoOutput: AIOutput;
-
-    if (isBarcode) {
-      demoOutput = {
-        status: 'partial',
-        dataSufficiencyScore: 68,
-        canAnalyze: ['Product positioning and target user segments', 'Listing optimization direction', 'Bundle opportunity for B2B buyers'],
-        cannotAnalyze: ['Real sales velocity and turnover rate', 'Profit margin per SKU', 'Customer repurchase rate'],
-        productPositioning: 'Professional-grade equipment targeting warehouse, retail and logistics operations in South Africa, where barcode adoption is growing with e-commerce expansion.',
-        listingDiagnosis: [
-          'Title lacks B2B-specific keywords like "warehouse", "logistics", "retail"',
-          'Selling points do not emphasize durability and high-volume throughput',
-          'Missing compatibility matrix (which POS/warehouse systems work with this device)',
-        ],
-        optimizedTitle: 'Industrial Barcode Printer for Warehouse, Retail & Logistics | High-Speed Thermal Transfer',
-        sellingPoints: [
-          'Prints 4x6 shipping labels at up to 6ips — ideal for high-volume fulfillment centers',
-          'Direct thermal and thermal transfer modes for different label materials',
-          'Compatible with most major shipping platforms and warehouse management systems',
-          'Heavy-duty metal frame built for continuous operation in demanding environments',
-          'USB, Serial, and Ethernet connectivity for flexible system integration',
-        ],
-        bundleRecommendation: [{
-          name: 'Warehouse Starter Bundle',
-          items: ['Industrial Barcode Printer', '4x6 Thermal Labels (1000 rolls)', 'Premium Wax Ribbon', 'Label Design Software'],
-          purpose: 'Reduce first-purchase friction for B2B buyers; software adds perceived value and reduces returns',
-        }],
-        seoKeywords: [
-          'barcode printer south africa',
-          'warehouse label printer',
-          'industrial thermal printer',
-          'shipping label printer',
-          'retail barcode scanner',
-          'logistics labeling solution',
-          '4x6 label printer',
-          'thermal transfer printer',
-        ],
-        contentIdeas: [
-          'How to Choose the Right Barcode Printer for Your South African Warehouse',
-          'Barcode Labeling 101: A Guide for South African Small Businesses',
-          'Top 5 Warehouse Efficiency Upgrades for Under R5,000',
-        ],
-        dataNeeded: ['Monthly sales velocity per SKU', 'Gross margin per product line', 'Return and defect rate by category'],
-        dataMetrics: [
-          { metric: 'B2B Quote Request Rate', reason: 'Tracks B2B channel demand', nextAction: 'If quote requests are high but conversions low, review pricing for B2B segment' },
-          { metric: 'Label Volume per Customer', reason: 'Indicates consumable repurchase potential', nextAction: 'If volume drops, trigger repurchase reminder email sequence' },
-          { metric: 'Return Rate by Product', reason: 'High return rate signals listing vs reality mismatch', nextAction: 'If return rate is high, review listing description accuracy and photo fidelity' },
-        ],
-        skuStrategy: 'This hardware SKU should serve as an entry point to drive label repurchase. Priority: (1) Optimize listing conversion for first order, (2) Add consumable bundle to raise AOV, (3) Track label attach rate per order, (4) Build 60-day repurchase email sequence for consumables.',
-      };
-    } else if (isConsumable && !isLabelPrinter) {
-      demoOutput = {
-        status: 'full',
-        dataSufficiencyScore: 82,
-        canAnalyze: ['Repeat purchase potential and LTV', 'Bundle opportunity with compatible hardware', 'SEO keyword and content direction'],
-        cannotAnalyze: ['Actual repurchase rate from CRM data', 'Inventory turnover days', 'Customer acquisition cost per channel'],
-        productPositioning: 'High-utility consumable driving recurring revenue through repeat purchase, targeting small businesses and home users with label printer hardware.',
-        listingDiagnosis: [
-          'Product title does not emphasize compatibility with specific printer models',
-          'No "buy in bulk" or subscription option mentioned',
-          'Missing use-case language for specific industries (e-commerce sellers, retailers)',
-        ],
-        optimizedTitle: 'Niimbot Series B Label Rolls 50x30mm — Compatible with B21/B1/B3S | High-Quality Thermal Labels (White)',
-        sellingPoints: [
-          'Compatible with Niimbot B21, B1, and B3S — no guesswork on which labels to buy',
-          'Premium thermal paper stock — crisp prints, no smudging or fading',
-          'Permanent adhesive holds firmly on most surfaces in South African climate conditions',
-          'Easy-peel backing for fast application in high-volume labeling tasks',
-          'Available in white, transparent, and colored — suit different labeling needs',
-        ],
-        bundleRecommendation: [
-          {
-            name: 'Small Business Label Value Pack',
-            items: ['Niimbot Series B Labels (5 rolls)', 'Cable Labels (1 roll)', 'Transparent Labels (1 roll)'],
-            purpose: 'Test whether multi-roll bundle improves AOV compared with single-roll purchase',
-          },
-          {
-            name: 'Auto-Replenishment Plan',
-            items: ['Monthly label subscription', '10% off recurring orders', 'Free shipping on all subscriptions'],
-            purpose: 'Lock in recurring revenue and reduce churn — labels are a natural subscription product',
-          },
-        ],
-        seoKeywords: [
-          'niimbot labels south africa',
-          'thermal label rolls 50x30mm',
-          'label printer consumables',
-          'buy labels online south africa',
-          'small business labeling supplies',
-          'label printer paper',
-          'ecommerce shipping labels',
-          'storage organization labels',
-        ],
-        contentIdeas: [
-          'How to Organize Your Small Business Inventory with Thermal Labels',
-          'Top 10 Labeling Mistakes E-commerce Sellers Make (and How to Fix Them)',
-          'Home Organization Hacks: How South African Homeowners Use Label Printers',
-        ],
-        dataNeeded: ['Current monthly reorder rate by customer', 'Average order frequency for consumables', 'Churn rate of customers who only bought consumables once'],
-        dataMetrics: [
-          { metric: 'Repeat Purchase Rate', reason: 'Core health metric for consumable SKUs', nextAction: 'Track repeat purchase within 60-90 days to validate consumable retention' },
-          { metric: 'Consumable/Hardware Ratio', reason: 'High ratio signals strong consumables ecosystem', nextAction: 'If ratio is low, investigate why hardware buyers are not converting to consumables' },
-          { metric: 'Customer LTV', reason: 'Track LTV by acquisition channel to optimize ad spend', nextAction: 'Use LTV data to decide where to increase or decrease ad spend' },
-        ],
-        skuStrategy: 'This consumable SKU is the LTV core of the category. Priority: (1) Drive first-time trial with value-pack bundle, (2) Convert to subscription or auto-replenishment, (3) Track reorder rate per customer segment, (4) Monitor consumable attach rate from hardware buyers.',
-      };
-    } else if (isBaseus) {
-      demoOutput = {
-        status: 'partial',
-        dataSufficiencyScore: 65,
-        canAnalyze: ['Product positioning vs competitors', 'Scene-based selling point opportunities', 'Cross-sell and upsell potential'],
-        cannotAnalyze: ['Real market share vs Anker and other competitors', 'Actual conversion rate by traffic source', 'Customer demographic breakdown'],
-        productPositioning: 'Price-competitive 3C accessory targeting value-conscious South African consumers who want reliable performance without paying premium brand prices.',
-        listingDiagnosis: [
-          'Title is purely specs-driven — no emotional hook or use-case scenario',
-          'Selling points compete directly with Anker, Samsung, and other established brands on specs alone',
-          'Missing social proof elements: use context, "ideal for students", "perfect for load-shedding charging needs"',
-        ],
-        optimizedTitle: 'Baseus 20000mAh Power Bank 65W — Fast Charge Laptop & Phone | Portable Charger for South Africa',
-        sellingPoints: [
-          '65W output charges most laptops via USB-C — work from anywhere in South Africa',
-          '20000mAh real capacity — charges iPhone 14 Pro over 4 times or Samsung S23 Ultra over 3 times',
-          'Dual output (USB-C + USB-A) — charge two devices simultaneously',
-          'Built-in LED display shows remaining battery percentage at a glance',
-          'Certified safe — over-charge, over-current, and short-circuit protection',
-        ],
-        bundleRecommendation: [{
-          name: 'Student & Remote Worker Bundle',
-          items: ['Baseus 20000mAh Power Bank', 'USB-C to USB-C Cable (1m)', 'Compact Travel Pouch'],
-          purpose: 'Potentially improve AOV if customers accept accessory bundles',
-        }],
-        seoKeywords: [
-          'power bank south africa',
-          '20000mah power bank',
-          'fast charging power bank',
-          'usb c power bank',
-          'laptop charger portable',
-          'load shedding power bank',
-          'south africa electronics',
-          'portable charger travel',
-        ],
-        contentIdeas: [
-          'Best Portable Power Banks for South African Load-Shedding (2025 Guide)',
-          'How to Choose the Right Power Bank for Your Phone, Tablet or Laptop',
-          'Travel Essentials: The Only Power Bank You Need for South African Road Trips',
-        ],
-        dataNeeded: ['Sales rank by category on Takealot', 'Customer review sentiment by feature', 'Traffic source breakdown (organic vs paid vs Takealot internal)'],
-        dataMetrics: [
-          { metric: 'Category Sales Rank', reason: 'Tracks competitive position against Anker and other brands', nextAction: 'If rank drops, review competitor pricing and adjust bundle offers' },
-          { metric: 'Review Sentiment Score', reason: 'Aggregate sentiment from reviews tells you which features resonate', nextAction: 'Use sentiment breakdown to prioritize next listing improvement' },
-          { metric: 'Add-to-Cart vs Purchase Rate', reason: 'High add-to-cart but low purchase = price or reviews issue', nextAction: 'If ATC is high but purchase is low, optimize price or address review concerns' },
-        ],
-        skuStrategy: 'This 3C SKU operates in a crowded competitive space. Priority: (1) Differentiate via use-case scenarios, not raw specs, (2) Build bundle offers to raise AOV, (3) Monitor category rank and review sentiment, (4) Test price elasticity before discounting.',
-      };
-    } else {
-      demoOutput = {
-        status: 'partial',
-        dataSufficiencyScore: 72,
-        canAnalyze: ['Product positioning for small business and home users', 'Listing optimization direction (title, bullet points)', 'Bundle and accessory cross-sell opportunity'],
-        cannotAnalyze: ['Real click-through rate and conversion rate', 'Customer purchase journey and drop-off points', 'Inventory turnover and stockout frequency'],
-        productPositioning: 'Versatile portable label printer for South African small businesses, home organizers, and retailers — differentiating on portability, ease of use, and no-ink convenience.',
-        listingDiagnosis: [
-          'Title focuses on specs ("portable") but misses the use-case ("small business labeling", "home organization")',
-          'Selling points are generic thermal printer benefits, not South African-specific use cases',
-          'Missing social proof — number of happy customers, compatible label range, print speed benchmarks',
-        ],
-        optimizedTitle: 'Niimbot B21 Portable Label Printer — Perfect for Small Business, Home & Retail Labeling | Bluetooth, No Ink Required',
-        sellingPoints: [
-          'Prints professional-quality labels at home, in-store, or in-warehouse — no ink or toner needed',
-          'Bluetooth connectivity — set up in 3 minutes, works directly from your phone or laptop',
-          'Compatible with Niimbot B-series labels in multiple sizes — 40x30mm, 50x30mm, and custom sizes',
-          'Lightweight (190g) and portable — take it to markets, pop-up shops, or around the warehouse',
-          'Free Niimbot app with 100+ label templates — designed for South African small business owners',
-        ],
-        bundleRecommendation: [
-          {
-            name: 'Small Business Starter Kit',
-            items: ['Niimbot B21 Printer', 'Series B Labels (2 rolls: 50x30mm)', 'Transparent Labels (1 roll)', 'Cable Labels (1 roll)'],
-            purpose: 'Potentially improve AOV if customers accept accessory bundles',
-          },
-        ],
-        seoKeywords: [
-          'label printer south africa',
-          'portable label printer',
-          'thermal label printer small business',
-          'bluetooth label printer',
-          'home organization labels',
-          'price tag printer',
-          'retail labeling solution',
-          'niimbot south africa',
-        ],
-        contentIdeas: [
-          'How to Organize Your Small Business Inventory with a Label Printer (Step-by-Step)',
-          '10 Ways South African Small Business Owners Use Label Printers to Save Time',
-          'Niimbot B21 Review: The Best Budget Label Printer for South African Small Businesses in 2025',
-        ],
-        dataNeeded: ['Weekly click-through rate by listing variant', 'Add-to-cart rate and abandoned cart reasons', 'Inventory turnover by SKU size/color variant'],
-        dataMetrics: [
-          { metric: 'CTR (Click-Through Rate)', reason: 'Measures title and main image effectiveness vs category average', nextAction: 'If CTR is low, test alternative titles and main images' },
-          { metric: 'Add-to-Cart Rate', reason: 'High CTR but low ATC = listing photos or reviews issue', nextAction: 'If add-to-cart is low despite good CTR, review listing photos and review scores' },
-          { metric: 'Bundle Attach Rate', reason: 'What % of hardware buyers add labels to cart — measures cross-sell effectiveness', nextAction: 'If attach rate is low, test bundle discount or auto-bundle at checkout' },
-          { metric: 'Label Repurchase Rate', reason: 'Critical metric for consumable business model — repeat purchase within 60 days', nextAction: 'If repurchase rate is low, set up automated replenishment reminder for lapsed customers' },
-        ],
-        skuStrategy: 'This versatile hardware SKU attracts multiple buyer segments. Priority: (1) Capture first-order conversion with clear use-case messaging, (2) Push bundle and accessory cross-sell, (3) Track add-to-cart and conversion rate per segment, (4) Convert hardware buyers to label consumable repurchase.',
-      };
-    }
+    if (isBarcode) demoOutput = all[0];
+    else if (isConsumable && !isLabelPrinter) demoOutput = all[1];
+    else if (isBaseus) demoOutput = all[2];
+    else demoOutput = all[3];
 
     setOutput(demoOutput);
     setDemoLoading('');
-  }, []);
+  }, [lang]);
 
   const handleAnalyze = async () => {
     if (!product.productName) return;
