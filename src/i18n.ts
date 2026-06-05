@@ -156,9 +156,23 @@ export function LangProvider({ children }: { children: ReactNode }) {
 
   const t = (section: keyof I18nTree) => {
     return (key: any, fallback?: string): any => {
+      // 支持嵌套路径：t('input')('fields')('productName')
+      if (Array.isArray(key)) {
+        let cur: any = I18N[section];
+        for (const k of key) cur = cur?.[k];
+        if (cur && typeof cur === 'object' && 'zh' in cur && 'en' in cur) {
+          return cur[lang];
+        }
+        return fallback ?? String(key);
+      }
       const node = (I18N[section] as any)[key];
       if (node && typeof node === 'object' && 'zh' in node && 'en' in node) {
         return node[lang];
+      }
+      // 如果拿到的不是叶子（zh/en）而是个子树，就原样返回让调用方继续向下取
+      // （例如 t('input')('fields') 返回整个 fields 子树对象）
+      if (node && typeof node === 'object') {
+        return node;
       }
       return fallback ?? String(key);
     };
