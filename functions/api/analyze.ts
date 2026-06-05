@@ -11,7 +11,7 @@ export async function onRequestPost(context: {
     );
   }
 
-  let product: Record<string, string | boolean>;
+  let product: Record<string, string | boolean | string[]>;
   try {
     product = await request.json();
   } catch {
@@ -21,7 +21,8 @@ export async function onRequestPost(context: {
     );
   }
 
-  const prompt = buildPrompt(product as any);
+  const lang = (product.lang === 'zh' || product.lang === 'en') ? product.lang : 'en';
+  const prompt = buildPrompt(product as any, lang);
   const model = env.MINIMAX_MODEL || 'abab6.5s-chat';
 
   try {
@@ -102,8 +103,19 @@ export async function onRequestPost(context: {
   }
 }
 
-function buildPrompt(info: Record<string, string | boolean>): string {
+function buildPrompt(info: Record<string, string | boolean | string[]>, lang: 'zh' | 'en'): string {
+  const isZh = lang === 'zh';
+  const outputLang = isZh ? 'Simplified Chinese (简体中文)' : 'English';
+  const context = isZh
+    ? 'Black Rhino 在南非经营电商和品牌本地化业务，主要商品包括标签机、条码机、耗材、3C 配件、办公及仓储相关产品，主营渠道 Takealot 和独立 Shopify 站，目标市场为南非消费者（含个人用户、小型商家、仓储/零售运营）。'
+    : 'Black Rhino operates e-commerce and brand localization business in South Africa. Product categories include label printers, barcode printers, consumables, electronics, office and warehouse-related products. Main sales channels: Takealot and independent Shopify store. Target market: South African consumers including home users, small businesses, and warehouse/retail operations.';
+
   return `You are an AI e-commerce operations assistant for Black Rhino South Africa.
+
+CRITICAL LANGUAGE RULE:
+- All human-readable text in the JSON output MUST be in ${outputLang}.
+- This includes: productPositioning, skuStrategy, optimizedTitle, sellingPoints[], bundleRecommendation[].name, bundleRecommendation[].items[], bundleRecommendation[].purpose, seoKeywords[], contentIdeas[], dataNeeded[], dataMetrics[].metric, dataMetrics[].reason, dataMetrics[].nextAction, canAnalyze[], cannotAnalyze[].
+- JSON keys and English enum values stay in English.
 
 Important rules:
 - Do NOT make conclusions about sales performance, profit margin, inventory turnover, ad ROI, or real SKU classification unless backend data is provided.
@@ -111,7 +123,7 @@ Important rules:
 - Return valid JSON only. No markdown, no extra text.
 
 Business context:
-Black Rhino operates e-commerce and brand localization business in South Africa. Product categories include label printers, barcode printers, consumables, electronics, office and warehouse-related products. Main sales channels: Takealot and independent Shopify store. Target market: South African consumers including home users, small businesses, and warehouse/retail operations.
+${context}
 
 Product Information:
 Product Name: ${info.productName || 'N/A'}
@@ -152,5 +164,5 @@ Please analyze the product and return a JSON object with the following structure
   ]
 }
 
-Output in English. Be specific and practical. Return JSON only.`;
+Output in ${outputLang}. Be specific and practical. Return JSON only.`;
 }

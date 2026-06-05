@@ -561,7 +561,7 @@ function LangSwitcher() {
 }
 
 export default function App() {
-  const { t, tr } = useLang();
+  const { t, tr, lang } = useLang();
   const EMPTY_PRODUCT = (): ProductInfo => ({
     productName: '', brand: '', category: '', price: '',
     currentTitle: '', description: '', currentSellingPoints: '',
@@ -806,7 +806,7 @@ export default function App() {
       const res = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(product),
+        body: JSON.stringify({ ...product, lang }),
       });
 
       const data = await res.json();
@@ -918,7 +918,11 @@ Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], produ
                 <>
                   <div className="mb-3 flex items-center gap-2 text-xs text-[#737373]">
                     <Info size={13} className="text-orange-500" />
-                    <span>AI 诊断输出原文（English） · 切换中英文仅影响界面语言，AI 输出内容保持英文不变</span>
+                    <span>
+                      {lang === 'zh'
+                        ? 'AI 诊断输出 · 跟随界面语言输出内容（演示数据为英文，真实 AI 调用跟随当前语言）'
+                        : 'AI Diagnostic Output · Content follows the current UI language (demo data shown in English; real AI calls follow the active language).'}
+                    </span>
                   </div>
                   <OutputSection output={output} />
                 </>
