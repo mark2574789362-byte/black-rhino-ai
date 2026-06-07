@@ -3,7 +3,6 @@ export interface ProductInfo {
   brand: string;
   category: string;
   price: string;
-  currentTitle: string;
   description: string;
   currentSellingPoints: string;
   channel: 'Takealot' | 'Independent Store' | 'Both';
@@ -51,7 +50,6 @@ export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
       brand: 'Niimbot',
       category: 'Business Label Printer',
       price: '899 ZAR',
-      currentTitle: 'Niimbot B21 Thermal Label Printer Portable',
       description:
         'Portable thermal label printer for small businesses and home use. No ink required. Bluetooth connectivity. Works with Niimbot label rolls.',
       currentSellingPoints: 'Portable, Thermal, Free Tape',
@@ -71,7 +69,6 @@ export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
       brand: 'Niimbot',
       category: 'Label Consumables',
       price: '129 ZAR',
-      currentTitle: 'Niimbot Series B Label Rolls (50x30mm)',
       description:
         'High-quality thermal labels compatible with Niimbot B21, B1, B3S printers. White paper stock, permanent adhesive.',
       currentSellingPoints: 'Compatible, High Quality, Easy Peel',
@@ -91,7 +88,6 @@ export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
       brand: 'Baseus',
       category: 'Power Bank',
       price: '599 ZAR',
-      currentTitle: 'Baseus 20000mAh Power Bank Fast Charging',
       description:
         '20000mAh portable charger with dual USB-C and USB-A ports. Supports 65W fast charging for laptops and phones.',
       currentSellingPoints: '20000mAh, 65W Fast Charging, Dual Port',

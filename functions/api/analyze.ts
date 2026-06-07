@@ -195,7 +195,6 @@ Product Name: ${info.productName || 'N/A'}
 Brand: ${info.brand || 'N/A'}
 Category: ${info.category || 'N/A'}
 Price: ${info.price || 'N/A'}
-Current Title: ${info.currentTitle || 'N/A'}
 Description: ${info.description || 'N/A'}
 Current Selling Points: ${info.currentSellingPoints || 'N/A'}
 Target Channel: ${info.channel || 'N/A'}

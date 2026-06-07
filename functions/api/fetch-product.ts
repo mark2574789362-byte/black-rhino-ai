@@ -3,7 +3,6 @@ interface FetchResult {
   brand: string;
   category: string;
   price: string;
-  currentTitle: string;
   description: string;
   currentSellingPoints: string;
   productUrl: string;
@@ -83,10 +82,16 @@ export async function onRequestPost(context: {
         Authorization: `Bearer ${minimaxKey}`,
       },
       body: JSON.stringify({
-        model: 'abab6.5s',
+        model: 'MiniMax-Text-01',
+        temperature: 0.1,
+        max_tokens: 800,
+        response_format: { type: 'json_object' },
         messages: [{
+          role: 'system',
+          content: 'You are a precise product information extractor. Always return valid JSON only, no markdown, no explanation. Never invent prices — if not found, return empty string.',
+        }, {
           role: 'user',
-          content: `Extract product information from search results about an online product. Return ONLY valid JSON with no markdown, no explanation.\n\nSearch results:\n${combinedContent}\n\nReturn EXACTLY this JSON:\n{\n  "productName": "short product name only, no seller tagline (e.g. DELI Yoga Mat 8mm TPE - 183cm Long Non-Slip Exercise & Fitness Mat)",\n  "brand": "brand name only (e.g. DELI)",\n  "category": "product category (e.g. Yoga Mat)",\n  "price": "correct price in ZAR (e.g. R 279 ZAR). If search shows R 279, the price is R 279 ZAR not R 30. Do not invent prices.",\n  "currentTitle": "product title as shown online, no domain suffixes",\n  "description": "brief 1-2 sentence description or empty string",\n  "currentSellingPoints": "key features/specs separated by commas or empty string",\n  "productUrl": "${url}"\n}`,
+          content: `Extract product information from the following search results about an online product page.\n\nRules:\n- productName: the FULL product title as displayed on the listing page, verbatim. Include brand, model, key specs and any subtitle/separator. Do NOT strip punctuation or marketing copy.\n- brand: brand only (e.g. "DELI").\n- category: product category (e.g. "Yoga Mat").\n- price: full price with currency, e.g. "R 279.00 ZAR". Use the largest numeric ZAR value you find, ignore "from R X" or per-unit pricing. If truly not present, return "".\n- description: 1-2 sentence summary, or "" if not available.\n- currentSellingPoints: comma-separated key specs/features, or "" if not available.\n- productUrl: "${url}"\n\nOutput schema (return this exact shape):\n{"productName":"","brand":"","category":"","price":"","description":"","currentSellingPoints":"","productUrl":""}\n\nSearch results:\n${combinedContent}`,
         }],
         temperature: 0.1,
         max_tokens: 600,
@@ -134,18 +139,29 @@ export async function onRequestPost(context: {
 }
 
 function manualParse(content: string, url: string): FetchResult {
-  const priceMatch = content.match(/R\s*([\d,\.]+)\s*(ZAR|rand|price)?/i);
-  const price = priceMatch ? `R ${priceMatch[1].replace(',', '')} ZAR` : '';
-  const brandMatch = content.match(/^([A-Z][a-zA-Z0-9\s&]+)\s+(Yoga|Mat|Printer|Power|Barcode|Label)/);
-  const brand = brandMatch ? brandMatch[1].trim() : '';
-  const title = content.split('\n')[0] || '';
+  // Pick the largest ZAR price to avoid picking "from R X" or unit prices
+  const priceMatches = [...content.matchAll(/R\s*([\d]+(?:[,\.]\d+)?)/gi)];
+  let price = '';
+  if (priceMatches.length > 0) {
+    const nums = priceMatches
+      .map(m => parseFloat(m[1].replace(/,/g, '')))
+      .filter(n => !isNaN(n) && n > 1);
+    if (nums.length > 0) {
+      const max = Math.max(...nums);
+      price = `R ${max.toFixed(2).replace(/\.00$/, '')} ZAR`;
+    }
+  }
+
+  const firstLine = content.split('\n').find(l => l.trim().length > 5) || '';
+  // Try to split brand from generic "BRAND ProductType" pattern
+  const brandMatch = firstLine.match(/^([A-Z][A-Za-z0-9]{2,}(?:\s+[A-Z][A-Za-z0-9]{2,})?)\s+([A-Z][a-z]+)/);
+  const brand = brandMatch ? brandMatch[1] : '';
 
   return {
-    productName: title,
+    productName: firstLine.trim(),
     brand,
     category: '',
     price,
-    currentTitle: title,
     description: '',
     currentSellingPoints: '',
     productUrl: url,

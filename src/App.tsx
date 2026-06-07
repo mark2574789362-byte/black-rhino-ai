@@ -354,7 +354,6 @@ function OutputSection({ output }: { output: AIOutput }) {
                 brand: { zh: '品牌', en: 'Brand' },
                 category: { zh: '类目', en: 'Category' },
                 price: { zh: '价格', en: 'Price' },
-                currentTitle: { zh: '当前商品标题', en: 'Current Title' },
                 description: { zh: '商品描述', en: 'Description' },
                 currentSellingPoints: { zh: '当前卖点', en: 'Current Selling Points' },
                 reviewSamples: { zh: '评价样例', en: 'Review Samples' },
@@ -675,7 +674,6 @@ function InputPanel({
     product.productName,
     product.brand,
     product.category,
-    product.currentTitle,
     product.description,
     product.targetUser,
   ].filter(Boolean).length;
@@ -703,7 +701,6 @@ function InputPanel({
         {field('brand', 'brand', 'brandPh')}
         {field('category', 'category', 'categoryPh')}
         {field('price', 'price', 'pricePh')}
-        {field('currentTitle', 'currentTitle', 'currentTitlePh')}
         {field('description', 'description', 'descriptionPh', 'textarea')}
         {field('sellingPoints', 'currentSellingPoints', 'sellingPointsPh', 'textarea')}
         <div className="space-y-2">
@@ -870,7 +867,7 @@ export default function App() {
   const { t, tr, lang } = useLang();
   const EMPTY_PRODUCT = (): ProductInfo => ({
     productName: '', brand: '', category: '', price: '',
-    currentTitle: '', description: '', currentSellingPoints: '',
+    description: '', currentSellingPoints: '',
     channel: 'Both', targetUser: 'All', consumable: false,
     relatedProducts: '', reviewSamples: '', productUrl: '',
   });
@@ -911,10 +908,10 @@ export default function App() {
     setError(null);
 
     // 检查必填字段。产品名称是必要项；为获得完整诊断，建议补全品牌、类目、描述、当前卖点。
-    // 实际可填项 7 个（不含 productName）：brand / category / price / currentTitle / description / currentSellingPoints / reviewSamples
+    // 实际可填项 6 个（不含 productName）：brand / category / price / description / currentSellingPoints / reviewSamples
     // 低于 3 个填项，输出信息不足报告
     const fillableFields: Array<keyof ProductInfo> = [
-      'brand', 'category', 'price', 'currentTitle',
+      'brand', 'category', 'price',
       'description', 'currentSellingPoints', 'reviewSamples',
     ];
     const filledFields = fillableFields.filter(f => (product[f] as string)?.trim().length);
@@ -1017,7 +1014,7 @@ Important rules:
 - If the provided product information is insufficient, clearly state what cannot be analyzed.
 - Return valid JSON only. No markdown.
 
-[Product fields sent: productName, brand, category, price, currentTitle, description, currentSellingPoints, channel, targetUser, consumable, relatedProducts, reviewSamples, productUrl]
+[Product fields sent: productName, brand, category, price, description, currentSellingPoints, channel, targetUser, consumable, relatedProducts, reviewSamples, productUrl]
 
 Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], productPositioning, listingDiagnosis[], optimizedTitle, sellingPoints[], bundleRecommendation[], seoKeywords[], contentIdeas[], dataNeeded[], dataMetrics[]`}
               </pre>
