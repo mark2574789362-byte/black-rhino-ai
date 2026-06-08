@@ -8,6 +8,7 @@ import {
 import type { ProductInfo, AIOutput } from './types';
 import { DEMO_PRODUCTS, DEMO_OUTPUTS_EN } from './types';
 import { useLang, I18N, type Lang } from './i18n';
+import SkuScanner from './SkuScanner';
 
 // 中文版 Demo 输出（顺序与 DEMO_OUTPUTS_EN 对齐）
 const DEMO_OUTPUTS_ZH: AIOutput[] = [
@@ -571,30 +572,6 @@ function OutputSection({ output }: { output: AIOutput }) {
           </div>
         </div>
       )}
-                                                {output.dataMetrics.length > 0 && (
-        <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
-          <div className="px-4 py-3 border-b border-[#2a2a2a] flex items-center gap-2">
-            <BarChart2 size={14} className="text-orange-500" />
-            <span className="text-sm font-medium text-[#e5e5e5]">{t('output', 'dataMetrics')}</span>
-          </div>
-          <div className="p-4 space-y-3">
-            {output.dataMetrics.map((m, i) => (
-              <div key={i} className="flex items-start gap-3 text-sm">
-                <div className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0 mt-1.5" />
-                <div className="flex-1">
-                  <div>
-                    <span className="text-[#e5e5e5] font-medium">{m.metric}</span>
-                    <span className="text-[#737373] text-xs ml-2">— {m.reason}</span>
-                  </div>
-                  {m.nextAction && (
-                    <p className="text-xs text-orange-500/80 mt-0.5">→ {m.nextAction}</p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -606,11 +583,13 @@ function InputPanel({
   onDemo,
   loading,
   demoLoading,
+  lang,
 }: {
   product: ProductInfo;
   onChange: (p: ProductInfo) => void;
   onAnalyze: () => void;
   onDemo: (demo: ProductInfo) => void;
+  lang: Lang;
   loading: boolean;
   demoLoading: string;
 }) {
@@ -678,7 +657,7 @@ function InputPanel({
     product.targetUser,
   ].filter(Boolean).length;
 
-  const progress = Math.round((filledCount / 6) * 100);
+  const progress = Math.round((filledCount / 5) * 100);
 
   return (
     <div className="flex flex-col h-full">
@@ -704,7 +683,10 @@ function InputPanel({
         {field('description', 'description', 'descriptionPh', 'textarea')}
         {field('sellingPoints', 'currentSellingPoints', 'sellingPointsPh', 'textarea')}
         <div className="space-y-2">
-          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input', 'fields', 'productUrl')}</label>
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide flex items-center gap-1.5">
+            <span>{t('input', 'fields', 'productUrl')}</span>
+            <span className="text-[10px] text-amber-500/80 normal-case tracking-normal">· Experimental</span>
+          </label>
           <div className="flex gap-2">
             <input
               type="url"
@@ -722,6 +704,11 @@ function InputPanel({
               {urlLoading ? t('input', 'fetching') : t('input', 'fetch')}
             </button>
           </div>
+          <p className="text-[10px] text-[#525252] leading-relaxed">
+            {lang === 'zh'
+              ? '抓取结果仅供参考，请人工核对后再诊断。'
+              : 'Crawled results are for reference only — please verify before diagnosis.'}
+          </p>
           {urlFetchError && <p className="text-xs text-red-500">{urlFetchError}</p>}
         </div>
 
@@ -978,8 +965,8 @@ export default function App() {
               <span className="text-white font-bold text-sm">BR</span>
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-[#e5e5e5]">{tr(I18N.header.title)}</h1>
-              <p className="text-xs text-[#737373]">{tr(I18N.header.subtitle)}</p>
+              <h1 className="text-sm font-semibold text-[#e5e5e5]">{tr(I18N.page.title)}</h1>
+              <p className="text-xs text-[#737373]">{tr(I18N.page.subtitle)}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -1032,60 +1019,80 @@ Output JSON includes: dataSufficiencyScore, canAnalyze[], cannotAnalyze[], produ
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto h-full px-6 py-5">
-          <div className="grid grid-cols-12 gap-5">
-            {/* Input Panel */}
-            <div className="col-span-12 lg:col-span-4 xl:col-span-3">
-              <div className="border border-[#1a1a1a] rounded-2xl p-5 bg-[#111111] flex flex-col max-h-[calc(100vh-180px)] overflow-y-auto">
-                <InputPanel
-                  product={product}
-                  onChange={setProduct}
-                  onAnalyze={handleAnalyze}
-                  onDemo={handleDemo}
-                  loading={loading}
-                  demoLoading={demoLoading}
-                />
-              </div>
-            </div>
+        <div className="max-w-7xl mx-auto h-full px-6 py-5 space-y-5">
+          {/* 上部：SKU Priority Scanner（含上传 / 粘贴 / 场景 Demo / Board） */}
+          <SkuScanner
+            onSelectForDiagnosis={(p) => {
+              setProduct(p);
+              setOutput(null);
+              setError(null);
+            }}
+          />
 
-            {/* Output Panel */}
-            <div className="col-span-12 lg:col-span-8 xl:col-span-9 overflow-y-auto pr-1">
-              {error ? (
-                <div className="border border-red-500/30 rounded-xl p-4 bg-[#141414]">
-                  <div className="flex items-center gap-2 mb-2">
-                    <AlertCircle size={16} className="text-red-500" />
-                    <span className="text-sm font-medium text-red-500">{tr(I18N.error.title)}</span>
-                  </div>
-                  <p className="text-sm text-[#a3a3a3]">{error}</p>
+          {/* 下部：Selected SKU Diagnosis（原单 SKU 诊断框架） */}
+          <div id="single-sku-diagnosis" className="border-t border-[#1a1a1a] pt-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Info size={14} className="text-orange-500" />
+              <h2 className="text-sm font-semibold text-[#e5e5e5]">
+                {t('scanner', 'diagnosis', 'title')}
+              </h2>
+              <span className="text-xs text-[#737373]">
+                {t('scanner', 'diagnosis', 'hint')}
+              </span>
+            </div>
+            <div className="grid grid-cols-12 gap-5">
+              {/* Input Panel */}
+              <div className="col-span-12 lg:col-span-4 xl:col-span-3">
+                <div className="border border-[#1a1a1a] rounded-2xl p-5 bg-[#111111] flex flex-col max-h-[calc(100vh-180px)] overflow-y-auto">
+                  <InputPanel
+                    product={product}
+                    onChange={setProduct}
+                    onAnalyze={handleAnalyze}
+                    onDemo={handleDemo}
+                    loading={loading}
+                    demoLoading={demoLoading}
+                    lang={lang}
+                  />
                 </div>
-              ) : output ? (
-                <>
-                  <div className="mb-3 flex items-center gap-2 text-xs text-[#737373]">
-                    <Info size={13} className="text-orange-500" />
-                    <span>
-                      {lang === 'zh'
-                        ? 'AI 诊断输出 · 跟随界面语言输出内容（演示数据为英文，真实 AI 调用跟随当前语言）'
-                        : 'AI Diagnostic Output · Content follows the current UI language (demo data shown in English; real AI calls follow the active language).'}
-                    </span>
-                  </div>
-                  <OutputSection output={output} />
-                </>
-              ) : (
-                <div className="space-y-3">
-                  {/* 业务价值说明（业务领导视角） */}
-                  <BusinessValueCard />
-                  {/* 顶部 banner 提示 */}
-                  <div className="border border-dashed border-[#2a2a2a] rounded-2xl p-8 text-center">
-                    <div className="w-14 h-14 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mb-4 mx-auto">
-                      <BarChart2 size={24} className="text-[#525252]" />
+              </div>
+
+              {/* Output Panel */}
+              <div className="col-span-12 lg:col-span-8 xl:col-span-9 overflow-y-auto pr-1">
+                {error ? (
+                  <div className="border border-red-500/30 rounded-xl p-4 bg-[#141414]">
+                    <div className="flex items-center gap-2 mb-2">
+                      <AlertCircle size={16} className="text-red-500" />
+                      <span className="text-sm font-medium text-red-500">{tr(I18N.error.title)}</span>
                     </div>
-                    <h3 className="text-sm font-medium text-[#525252] mb-1">{tr(I18N.empty.title)}</h3>
-                    <p className="text-xs text-[#3a3a3a] max-w-xs mx-auto">
-                      {tr(I18N.empty.desc)}
-                    </p>
+                    <p className="text-sm text-[#a3a3a3]">{error}</p>
                   </div>
-                </div>
-              )}
+                ) : output ? (
+                  <>
+                    <div className="mb-3 flex items-center gap-2 text-xs text-[#737373]">
+                      <Info size={13} className="text-orange-500" />
+                      <span>
+                        {lang === 'zh'
+                          ? 'AI 诊断输出 · 跟随界面语言输出内容（演示数据为英文，真实 AI 调用跟随当前语言）'
+                          : 'AI Diagnostic Output · Content follows the current UI language (demo data shown in English; real AI calls follow the active language).'}
+                      </span>
+                    </div>
+                    <OutputSection output={output} />
+                  </>
+                ) : (
+                  <div className="space-y-3">
+                    <BusinessValueCard />
+                    <div className="border border-dashed border-[#2a2a2a] rounded-2xl p-8 text-center">
+                      <div className="w-14 h-14 rounded-2xl bg-[#1a1a1a] flex items-center justify-center mb-4 mx-auto">
+                        <BarChart2 size={24} className="text-[#525252]" />
+                      </div>
+                      <h3 className="text-sm font-medium text-[#525252] mb-1">{tr(I18N.empty.title)}</h3>
+                      <p className="text-xs text-[#3a3a3a] max-w-xs mx-auto">
+                        {tr(I18N.empty.desc)}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

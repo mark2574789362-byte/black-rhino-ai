@@ -42,6 +42,52 @@ export interface MetricItem {
   nextAction: string;
 }
 
+// ================ 批量 SKU 扫描 ================
+
+/**
+ * 批量扫描的最小 SKU 记录（来自 CSV / 手动粘贴 / Demo）
+ * Product Name / Brand / Category / Type 是规则扫描的最低要求
+ */
+export interface BatchSkuInput {
+  productName: string;
+  brand: string;
+  category: string;
+  type: string; // "Hardware" | "Consumable" | 其他自由值
+  price?: string;
+  description?: string;
+  currentSellingPoints?: string;
+  relatedProducts?: string;
+  reviewSamples?: string;
+}
+
+/** SKU 在品类中的经营角色（规则扫描输出） */
+export type SkuRole =
+  | 'Hardware Entry SKU'
+  | 'Repeat Purchase SKU'
+  | 'Competitive Electronics SKU'
+  | 'B2B Equipment SKU'
+  | 'Generic SKU';
+
+/** 优先级：A > B > C */
+export type Priority = 'A' | 'B' | 'C';
+
+export interface SkuScanResult {
+  sku: BatchSkuInput;
+  role: SkuRole;
+  opportunity: string;
+  risk: string;
+  priority: Priority;
+  nextAction: string;
+  reasons: string[]; // 命中的规则名（中文/英文），用于表格 tooltip
+}
+
+/** CSV 模板（前端 Download Template 直接生成） */
+export const SKU_CSV_TEMPLATE = `Product Name,Brand,Category,Type,Price,Description,Current Selling Points,Related Products,Review Samples
+Niimbot B21 Label Printer,Niimbot,Business Label Printer,Hardware,899 ZAR,Portable thermal label printer,Portable; Bluetooth; No ink,Series B Labels; Transparent Labels,Easy setup; good for small business
+Niimbot Series B Label Rolls,Niimbot,Label Consumables,Consumable,129 ZAR,Thermal labels for B21/B1/B3S,Compatible; Easy Peel,Niimbot B21; Niimbot B1,Will reorder
+Baseus 20000mAh Power Bank,Baseus,Power Bank,Hardware,599 ZAR,65W portable charger,Fast charging; Dual port,USB-C Cable; Travel Pouch,Good capacity but heavy
+`;
+
 export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
   {
     name: '设备 + 耗材复购模型',

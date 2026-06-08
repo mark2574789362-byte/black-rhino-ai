@@ -156,7 +156,87 @@ export const I18N = {
   // ============ Footer ============
   footer: {
     product: { zh: 'Black Rhino AI 商品运营诊断助手 · Demo v0.2', en: 'Black Rhino AI Product Operations Assistant · Demo v0.2' },
-    powered: { zh: '由 MiniMax API 驱动 · 未访问后端销售数据', en: 'Powered by MiniMax API · No backend sales data accessed' },
+    powered: { zh: '由 AI Workflow 驱动 · 未访问后端销售数据', en: 'Powered by AI Workflow · No backend sales data accessed' },
+  },
+
+  // ============ Page-level title & subtitle ============
+  page: {
+    title: {
+      zh: 'Black Rhino 多 SKU 运营效率提升 Demo',
+      en: 'Black Rhino Multi-SKU Operations Workflow Demo',
+    },
+    subtitle: {
+      zh: '基于公开商品信息，模拟 AI 如何帮助运营人员完成 SKU 初筛、单品诊断、Bundle 机会识别与上线后数据验证。',
+      en: 'A lightweight workflow showing how AI can support SKU prioritization, product diagnosis, bundle opportunity discovery and post-launch metric validation.',
+    },
+  },
+
+  // ============ Batch SKU Scanner ============
+  scanner: {
+    sectionTitle: {
+      zh: 'SKU 运营优先级扫描器',
+      en: 'SKU Priority Scanner',
+    },
+    uploadCard: {
+      title: { zh: 'Upload SKU File', en: 'Upload SKU File' },
+      hint: {
+        zh: '支持 CSV / Excel 模板数据。当前版本建议将 Excel 另存为 CSV 后上传。',
+        en: 'Supports CSV / Excel template data. For this version, save Excel as CSV before uploading.',
+      },
+      downloadTemplate: { zh: 'Download Template', en: 'Download Template' },
+      uploadCsv: { zh: 'Upload CSV', en: 'Upload CSV' },
+      parseError: {
+        zh: 'CSV 解析失败：请检查文件是否包含表头 Product Name, Brand, Category, Type。',
+        en: 'CSV parse failed: please check the file contains the header Product Name, Brand, Category, Type.',
+      },
+    },
+    manualCard: {
+      title: { zh: '或手动粘贴 SKU 记录', en: 'Or paste SKU records manually' },
+      hint: {
+        zh: '每行一个 SKU，字段用 | 分隔：Product Name | Brand | Category | Type | Related Products',
+        en: 'One SKU per line. Fields separated by | : Product Name | Brand | Category | Type | Related Products',
+      },
+      placeholder: {
+        zh: 'Niimbot B21 Label Printer | Niimbot | Business Label Printer | Hardware | Series B Labels, Transparent Labels',
+        en: 'Niimbot B21 Label Printer | Niimbot | Business Label Printer | Hardware | Series B Labels, Transparent Labels',
+      },
+      scanBtn: { zh: 'Scan SKUs', en: 'Scan SKUs' },
+      parseError: {
+        zh: '解析失败：每行至少需要 4 个字段（名称 | 品牌 | 类目 | 类型）',
+        en: 'Parse failed: each row needs at least 4 fields (Name | Brand | Category | Type)',
+      },
+    },
+    demoCard: {
+      title: { zh: '业务场景快速体验', en: 'Business Scenario Examples' },
+      hint: {
+        zh: '点击下方任意场景，载入到扫描器中查看批量分析结果。',
+        en: 'Click any scenario to load it into the scanner and see batch analysis.',
+      },
+      loadBtn: { zh: '加载到扫描器', en: 'Load into Scanner' },
+    },
+    board: {
+      title: { zh: 'SKU 优先级面板', en: 'SKU Priority Board' },
+      empty: {
+        zh: '尚未扫描。请上传 CSV、粘贴记录或加载一个业务场景。',
+        en: 'No SKUs scanned yet. Upload a CSV, paste records, or load a scenario.',
+      },
+      cols: {
+        sku: { zh: 'SKU', en: 'SKU' },
+        role: { zh: '经营角色', en: 'Role' },
+        opportunity: { zh: '最大机会', en: 'Opportunity' },
+        risk: { zh: '最大风险', en: 'Risk' },
+        priority: { zh: '优先级', en: 'Priority' },
+        next: { zh: '下一步动作', en: 'Next Action' },
+      },
+      runDiagnosis: { zh: 'Run full diagnosis', en: 'Run full diagnosis' },
+    },
+    diagnosis: {
+      title: { zh: '重点 SKU 详细诊断', en: 'Selected SKU Diagnosis' },
+      hint: {
+        zh: '补充 Description / Review Samples / Selling Points 后再点击 Run SKU Diagnosis。',
+        en: 'Fill in Description / Review Samples / Selling Points, then click Run SKU Diagnosis.',
+      },
+    },
   },
 
   // ============ Language switcher ============
