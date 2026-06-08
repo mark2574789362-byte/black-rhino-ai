@@ -60,13 +60,47 @@ export interface BatchSkuInput {
   reviewSamples?: string;
 }
 
-/** SKU 在品类中的经营角色（规则扫描输出） */
+/** SKU 在品类中的经营角色（规则扫描输出枚举 key） */
 export type SkuRole =
-  | 'Hardware Entry SKU'
-  | 'Repeat Purchase SKU'
-  | 'Competitive Electronics SKU'
-  | 'B2B Equipment SKU'
-  | 'Generic SKU';
+  | 'hardwareEntry'
+  | 'repeatPurchase'
+  | 'competitiveElectronics'
+  | 'b2bEquipment'
+  | 'generic';
+
+/** 规则名 key（命中提示 / tooltip 使用） */
+export type RuleKey =
+  | 'consumable'
+  | 'hardwareAttach'
+  | 'competitive3C'
+  | 'b2b'
+  | 'generic';
+
+/** 问题 / 风险枚举 key */
+export type IssueKey =
+  | 'compatibilityScope'
+  | 'bundlePricePressure'
+  | 'informationIncomplete'
+  | 'useCaseMessagingWeak'
+  | 'priceCompetition'
+  | 'longSalesCycle'
+  | 'compatibilityUnclear'
+  | 'noRoleDetected';
+
+/** 机会枚举 key */
+export type OpportunityKey =
+  | 'ltvGrowth'
+  | 'consumableAttach'
+  | 'scenarioDifferentiation'
+  | 'b2bScenario'
+  | 'toBeConfirmed';
+
+/** 下一步动作枚举 key */
+export type ActionKey =
+  | 'buildBundlePlan'
+  | 'runFullDiagnosis'
+  | 'improveSellingPoints'
+  | 'completeProductCard';
 
 /** 优先级：A > B > C */
 export type Priority = 'A' | 'B' | 'C';
@@ -74,11 +108,11 @@ export type Priority = 'A' | 'B' | 'C';
 export interface SkuScanResult {
   sku: BatchSkuInput;
   role: SkuRole;
-  opportunity: string;
-  risk: string;
+  opportunity: OpportunityKey;
+  risk: IssueKey;
   priority: Priority;
-  nextAction: string;
-  reasons: string[]; // 命中的规则名（中文/英文），用于表格 tooltip
+  nextAction: ActionKey;
+  rule: RuleKey; // 命中的规则名 key，用于表格 tooltip
 }
 
 /** CSV 模板（前端 Download Template 直接生成） */

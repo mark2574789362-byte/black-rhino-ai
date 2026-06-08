@@ -1,12 +1,16 @@
 import { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Upload, FileDown, ClipboardPaste, Play, Sparkles, BarChart2, X, AlertCircle, Package,
+  Upload, FileDown, ClipboardList, Play, Sparkles, BarChart2, X, AlertCircle, Package,
+  Plus, Trash2,
 } from 'lucide-react';
 import { useLang } from './i18n';
-import { DEMO_PRODUCTS, SKU_CSV_TEMPLATE, type BatchSkuInput, type SkuScanResult } from './types';
 import {
-  parseCsv, parseManual, scanSkus, triggerTemplateDownload, batchToProduct,
+  DEMO_PRODUCTS, SKU_CSV_TEMPLATE,
+  type BatchSkuInput, type SkuScanResult, type RuleKey,
+} from './types';
+import {
+  parseCsv, scanSkus, triggerTemplateDownload, batchToProduct,
 } from './skuScanner';
 import type { ProductInfo } from './types';
 
@@ -24,30 +28,46 @@ interface Props {
   onSelectForDiagnosis: (p: ProductInfo) => void;
 }
 
+/** 结构化表单的初始空记录 */
+const EMPTY_FORM: BatchSkuInput = {
+  productName: '',
+  brand: '',
+  category: '',
+  type: 'Hardware',
+  price: '',
+  description: '',
+  currentSellingPoints: '',
+  relatedProducts: '',
+  reviewSamples: '',
+};
+
 export default function SkuScanner({ onSelectForDiagnosis }: Props) {
-  const { t, lang } = useLang();
+  const { t } = useLang();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // 手动粘贴状态
-  const [manualText, setManualText] = useState('');
-  // 扫描结果
+  // 手动添加：当前正在编辑的表单（单一表单 + "再添加一条"按钮）
+  const [form, setForm] = useState<BatchSkuInput>(EMPTY_FORM);
+  // 已加入扫描器的 SKU 缓冲（点击 Add & Scan 时 push 进来，再次点击清空表单）
+  const [pendingSkus, setPendingSkus] = useState<BatchSkuInput[]>([]);
+
+  // 扫描结果（已运行的）
   const [results, setResults] = useState<SkuScanResult[]>([]);
   // 错误
   const [error, setError] = useState<string | null>(null);
-  // 业务场景 demo 点击后的瞬态
-  const [loadedDemo, setLoadedDemo] = useState<string | null>(null);
+  // 上次扫描的来源
+  const [source, setSource] = useState<string>('');
 
-  // ---------- 解析逻辑 ----------
-  const runScan = (skus: BatchSkuInput[], source: string) => {
+  // ---------- 统一扫描入口 ----------
+  const runScan = (skus: BatchSkuInput[], src: string) => {
     if (!skus.length) {
       setError(t('scanner', 'board', 'empty'));
       setResults([]);
       return;
     }
-    const scanned = scanSkus(skus, { lang });
+    const scanned = scanSkus(skus, {});
     setResults(scanned);
     setError(null);
-    setLoadedDemo(source);
+    setSource(src);
   };
 
   const handleUpload = async (file: File) => {
@@ -61,20 +81,31 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
     runScan(res.skus, file.name);
   };
 
-  const handleManualScan = () => {
-    if (!manualText.trim()) {
-      setError(t('scanner', 'board', 'empty'));
+  // ---------- 手动添加：Add & Scan ----------
+  const handleAddAndScan = () => {
+    // 必填校验
+    if (!form.productName.trim() || !form.brand.trim() || !form.category.trim() || !form.type.trim()) {
+      setError(t('scanner', 'manualCard', 'requiredMissing'));
       return;
     }
-    const res = parseManual(manualText);
-    if (!res.ok) {
-      setError(t('scanner', 'manualCard', 'parseError'));
-      return;
-    }
-    runScan(res.skus, 'manual');
+    const next = [...pendingSkus, form];
+    setPendingSkus(next);
+    setError(null);
+    // 立即跑扫描：把刚加入的 + 之前所有 pending 一起
+    runScan(next, 'manual');
+    // 清空表单
+    setForm(EMPTY_FORM);
   };
 
-  // 加载某个 Demo 场景：直接生成 1 条 SKU 跑规则
+  const handleClearManual = () => {
+    setForm(EMPTY_FORM);
+    setPendingSkus([]);
+    setResults([]);
+    setError(null);
+    setSource('');
+  };
+
+  // ---------- 加载 Demo：直接当作 1 条 SKU 跑规则 ----------
   const handleLoadDemo = (demoKey: string) => {
     const demo = DEMO_PRODUCTS.find(d => d.name === demoKey);
     if (!demo) return;
@@ -89,26 +120,43 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
       relatedProducts: demo.product.relatedProducts,
       reviewSamples: demo.product.reviewSamples,
     };
-    setManualText(
-      `${sku.productName} | ${sku.brand} | ${sku.category} | ${sku.type} | ${sku.relatedProducts || ''}`
-    );
-    runScan([sku], demo.name);
+    // 同时把这个 demo 写入 pending 并跑扫描
+    const next = [...pendingSkus, sku];
+    setPendingSkus(next);
+    runScan(next, demo.name);
   };
 
-  // Run full diagnosis：把该 SKU 推给上层单 SKU 表单
+  // ---------- Run full diagnosis：把该 SKU 推给上层单 SKU 表单 ----------
   const handleRunDiagnosis = (r: SkuScanResult) => {
     onSelectForDiagnosis(batchToProduct(r.sku));
-    // 平滑滚到单 SKU 诊断区
     setTimeout(() => {
       document.getElementById('single-sku-diagnosis')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 50);
   };
 
+  // ---------- 表单字段渲染 ----------
+  const FormField = ({
+    fieldKey, k, ph, required = false,
+  }: { fieldKey: keyof BatchSkuInput; k: string; ph?: string; required?: boolean }) => (
+    <div className="space-y-1">
+      <label className="text-[10px] font-medium text-[#a3a3a3] uppercase tracking-wide">
+        {t('scanner', 'manualCard', 'fields', k as any)}{required ? '' : ''}
+      </label>
+      <input
+        type="text"
+        value={(form[fieldKey] as string) || ''}
+        onChange={(e) => setForm({ ...form, [fieldKey]: e.target.value })}
+        placeholder={ph}
+        className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-md px-2.5 py-1.5 text-xs text-[#e5e5e5] placeholder-[#525252] focus:border-orange-500 transition-colors"
+      />
+    </div>
+  );
+
   return (
     <div className="space-y-4">
       {/* ============== 顶部：左侧 Scanner + 右侧 Demo Examples ============== */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* 左侧：SKU Priority Scanner（包含上传 + 手动粘贴） */}
+        {/* 左侧：SKU Priority Scanner（包含上传 + 手动添加） */}
         <div className="lg:col-span-2 space-y-3">
           <div className="flex items-center gap-2">
             <BarChart2 size={16} className="text-orange-500" />
@@ -153,17 +201,16 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
                 onChange={(e) => {
                   const f = e.target.files?.[0];
                   if (f) handleUpload(f);
-                  // 允许重复上传同名文件
                   e.target.value = '';
                 }}
               />
             </div>
           </div>
 
-          {/* 手动粘贴 卡片 */}
+          {/* 手动添加 卡片（结构化表单） */}
           <div className="border border-[#1f1f1f] rounded-xl p-4 bg-[#141414]">
             <div className="flex items-start gap-2 mb-3">
-              <ClipboardPaste size={14} className="text-orange-500 mt-0.5" />
+              <ClipboardList size={14} className="text-orange-500 mt-0.5" />
               <div className="flex-1">
                 <div className="text-sm font-medium text-[#e5e5e5]">
                   {t('scanner', 'manualCard', 'title')}
@@ -173,21 +220,76 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
                 </p>
               </div>
             </div>
-            <textarea
-              value={manualText}
-              onChange={(e) => setManualText(e.target.value)}
-              rows={4}
-              placeholder={t('scanner', 'manualCard', 'placeholder')}
-              className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-xs text-[#e5e5e5] placeholder-[#525252] resize-y focus:border-orange-500 transition-colors font-mono"
-            />
-            <div className="mt-2 flex justify-end">
+
+            {/* 必填区：4 个字段 2x2 网格 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
+              <FormField fieldKey="productName" k="productName" required />
+              <FormField fieldKey="brand" k="brand" required />
+              <FormField fieldKey="category" k="category" required />
+              {/* Type：固定两个二选一按钮，避免自由输入导致规则匹配不到 */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-medium text-[#a3a3a3] uppercase tracking-wide">
+                  {t('scanner', 'manualCard', 'fields', 'type')}
+                </label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {(['Hardware', 'Consumable'] as const).map(v => (
+                    <button
+                      key={v}
+                      onClick={() => setForm({ ...form, type: v })}
+                      className={`text-xs py-1.5 rounded-md border transition-colors ${
+                        form.type === v
+                          ? 'border-orange-500 bg-orange-500/10 text-orange-500'
+                          : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
+                      }`}
+                    >
+                      {t('scanner', 'manualCard', 'fields', v === 'Hardware' ? 'typeHardware' : 'typeConsumable')}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 选填区：5 个字段，单列布局避免拥挤 */}
+            <details className="group">
+              <summary className="text-[11px] text-[#737373] hover:text-[#a3a3a3] cursor-pointer list-none flex items-center gap-1 select-none">
+                <Plus size={11} className="group-open:rotate-45 transition-transform" />
+                {t('scanner', 'manualCard', 'fields', 'price').includes('optional')
+                  ? t('scanner', 'manualCard', 'fields', 'price').replace(' (选填)', '').replace(' (optional)', '')
+                  : 'Optional fields'}
+              </summary>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
+                <FormField fieldKey="price" k="price" />
+                <FormField fieldKey="description" k="description" />
+                <FormField fieldKey="currentSellingPoints" k="currentSellingPoints" />
+                <FormField fieldKey="relatedProducts" k="relatedProducts" />
+                <div className="sm:col-span-2">
+                  <FormField fieldKey="reviewSamples" k="reviewSamples" />
+                </div>
+              </div>
+            </details>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <button
-                onClick={handleManualScan}
+                onClick={handleAddAndScan}
                 className="text-xs px-3 py-2 rounded-lg bg-orange-600 hover:bg-orange-500 text-white flex items-center gap-1.5 transition-colors"
               >
                 <Play size={12} />
-                {t('scanner', 'manualCard', 'scanBtn')}
+                {t('scanner', 'manualCard', 'addBtn')}
               </button>
+              {pendingSkus.length > 0 && (
+                <button
+                  onClick={handleClearManual}
+                  className="text-xs px-3 py-2 rounded-lg border border-[#2a2a2a] text-[#737373] hover:text-red-400 hover:border-red-400/40 flex items-center gap-1.5 transition-colors"
+                >
+                  <Trash2 size={12} />
+                  {t('scanner', 'manualCard', 'addAnother')}
+                </button>
+              )}
+              {pendingSkus.length > 0 && (
+                <span className="text-[10px] text-[#737373]">
+                  · {pendingSkus.length} pending
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -259,8 +361,7 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
           </span>
           {results.length > 0 && (
             <span className="ml-auto text-xs text-[#737373]">
-              {results.length} {lang === 'zh' ? '条 SKU' : 'SKUs'}
-              {loadedDemo && ` · ${loadedDemo}`}
+              {results.length} {t('scanner', 'board', 'cols', 'sku')}{source ? ` · ${source}` : ''}
             </span>
           )}
         </div>
@@ -292,18 +393,30 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
                     <td className="px-3 py-2.5 text-[#e5e5e5] font-medium align-top">
                       {r.sku.productName}
                       <div className="text-[10px] text-[#525252] mt-0.5">
-                        {r.sku.brand} · {r.sku.category}
+                        {r.sku.brand} · {r.sku.category} · {r.sku.type}
+                      </div>
+                      {/* 命中规则作为 tooltip/小字说明 */}
+                      <div className="text-[10px] text-[#525252] mt-0.5 italic">
+                        {t('scanner', 'rule', r.rule as RuleKey)}
                       </div>
                     </td>
-                    <td className="px-3 py-2.5 text-[#a3a3a3] align-top">{r.role}</td>
-                    <td className="px-3 py-2.5 text-[#a3a3a3] align-top">{r.opportunity}</td>
-                    <td className="px-3 py-2.5 text-[#a3a3a3] align-top">{r.risk}</td>
+                    <td className="px-3 py-2.5 text-[#a3a3a3] align-top">
+                      {t('scanner', 'role', r.role as any)}
+                    </td>
+                    <td className="px-3 py-2.5 text-[#a3a3a3] align-top">
+                      {t('scanner', 'opportunities', r.opportunity as any)}
+                    </td>
+                    <td className="px-3 py-2.5 text-[#a3a3a3] align-top">
+                      {t('scanner', 'issues', r.risk as any)}
+                    </td>
                     <td className="px-3 py-2.5 text-center align-top">
                       <span className={`inline-block text-[11px] font-semibold px-2 py-0.5 rounded border ${priorityColor(r.priority)}`}>
                         {r.priority}
                       </span>
                     </td>
-                    <td className="px-3 py-2.5 text-[#a3a3a3] align-top">{r.nextAction}</td>
+                    <td className="px-3 py-2.5 text-[#a3a3a3] align-top">
+                      {t('scanner', 'actions', r.nextAction as any)}
+                    </td>
                     <td className="px-3 py-2.5 text-right align-top">
                       <button
                         onClick={() => handleRunDiagnosis(r)}

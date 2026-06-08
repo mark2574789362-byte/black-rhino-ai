@@ -4,12 +4,15 @@
  * 设计原则：
  *  - 不调 AI，完全在前端用规则跑（第一阶段）
  *  - 5 类规则：耗材 / 设备+耗材 / 3C / B2B / 信息不足
- *  - 输出统一的 SkuScanResult，可直接喂给 Priority Board 表格
- *  - 中英字段都保留，UI 层根据 lang 切换显示
+ *  - 输出统一的 SkuScanResult，所有文案都是 i18n key，由 UI 层翻译
+ *  - 不依赖外部 lang 参数，避免之前 lang 三元表达式的判断错误
  * ------------------------------------------------------------
  */
 
-import type { BatchSkuInput, SkuScanResult, ProductInfo } from './types';
+import type {
+  BatchSkuInput, SkuScanResult, ProductInfo,
+  RuleKey, IssueKey, OpportunityKey, ActionKey,
+} from './types';
 
 // 字段匹配工具：大小写不敏感 + 包含关系
 const contains = (haystack: string | undefined, needle: string) =>
@@ -23,16 +26,15 @@ const relatedHasAny = (related: string | undefined, keywords: string[]) => {
 };
 
 export interface ScanRulesOptions {
-  /** 中英输出（用于展示在表格里） */
-  lang: 'zh' | 'en';
+  // 留作未来扩展，目前规则引擎不依赖 lang（返回 key）
+  lang?: 'zh' | 'en';
 }
 
 /**
  * 单条 SKU 扫描：按优先级匹配规则，命中后立即返回
  * 规则按业务重要度排序：耗材复购 > 设备+耗材 > 3C > B2B > 兜底
  */
-export function scanSku(sku: BatchSkuInput, opts: ScanRulesOptions): SkuScanResult {
-  const { lang } = opts;
+export function scanSku(sku: BatchSkuInput, _opts: ScanRulesOptions = {}): SkuScanResult {
   const type = (sku.type || '').toLowerCase();
   const category = sku.category || '';
   const related = sku.relatedProducts || '';
@@ -45,26 +47,27 @@ export function scanSku(sku: BatchSkuInput, opts: ScanRulesOptions): SkuScanResu
   if (!sku.currentSellingPoints) missing.push('currentSellingPoints');
 
   // ---- 规则 1：耗材类（标签/碳带/卷纸等）----
-  if (
-    type === 'consumable' ||
-    contains(category, 'label') ||
+  // 注意：设备型打印机类目可能含 "label"（如 Business Label Printer），
+  // 需要排除这类设备型业务。判定逻辑：type=consumable，或者类目词表达“耗材”本身。
+  const isConsumableCategory =
     contains(category, 'consumable') ||
     contains(category, 'roll') ||
     contains(category, 'tape') ||
-    contains(category, 'ribbon')
-  ) {
+    contains(category, 'ribbon') ||
+    // 包含 "label" 但后面跟 roll/paper/sticker 等才是耗材
+    (contains(category, 'label') && (contains(category, 'roll') || contains(category, 'paper') || contains(category, 'sticker')));
+
+  if (type === 'consumable' || isConsumableCategory) {
     return {
       sku,
-      role: 'Repeat Purchase SKU',
-      opportunity: lang
-        ? 'LTV growth · Reorder opportunity'
-        : 'LTV 增长 · 复购机会',
+      role: 'repeatPurchase',
+      opportunity: 'ltvGrowth' as OpportunityKey,
       risk: missing.length
-        ? (lang ? 'Compatibility scope unclear' : '兼容范围不清晰')
-        : (lang ? 'Pricing pressure vs bundles' : '套餐内价格压力'),
+        ? ('compatibilityScope' as IssueKey)
+        : ('bundlePricePressure' as IssueKey),
       priority: 'A',
-      nextAction: lang ? 'Build bundle plan' : '建立组合包计划',
-      reasons: [lang ? 'Rule: Consumable category' : '规则：耗材品类'],
+      nextAction: 'buildBundlePlan' as ActionKey,
+      rule: 'consumable' as RuleKey,
     };
   }
 
@@ -75,14 +78,14 @@ export function scanSku(sku: BatchSkuInput, opts: ScanRulesOptions): SkuScanResu
   ) {
     return {
       sku,
-      role: 'Hardware Entry SKU',
-      opportunity: lang ? 'Consumable attach' : '耗材连带',
+      role: 'hardwareEntry',
+      opportunity: 'consumableAttach' as OpportunityKey,
       risk: missing.length
-        ? (lang ? 'Information incomplete' : '信息不完整')
-        : (lang ? 'Use-case messaging weak' : '使用场景描述弱'),
+        ? ('informationIncomplete' as IssueKey)
+        : ('useCaseMessagingWeak' as IssueKey),
       priority: 'A',
-      nextAction: lang ? 'Run full diagnosis' : '运行详细诊断',
-      reasons: [lang ? 'Rule: Hardware + consumable attach' : '规则：设备 + 耗材连带'],
+      nextAction: 'runFullDiagnosis' as ActionKey,
+      rule: 'hardwareAttach' as RuleKey,
     };
   }
 
@@ -98,14 +101,12 @@ export function scanSku(sku: BatchSkuInput, opts: ScanRulesOptions): SkuScanResu
   ) {
     return {
       sku,
-      role: 'Competitive Electronics SKU',
-      opportunity: lang ? 'Scenario differentiation' : '场景差异化',
-      risk: lang
-        ? 'Price competition · Spec homogeneity'
-        : '价格竞争 · 参数同质化',
+      role: 'competitiveElectronics',
+      opportunity: 'scenarioDifferentiation' as OpportunityKey,
+      risk: 'priceCompetition' as IssueKey,
       priority: 'B',
-      nextAction: lang ? 'Improve selling points' : '优化场景化卖点',
-      reasons: [lang ? 'Rule: 3C competitive' : '规则：3C 同质化'],
+      nextAction: 'improveSellingPoints' as ActionKey,
+      rule: 'competitive3C' as RuleKey,
     };
   }
 
@@ -119,35 +120,35 @@ export function scanSku(sku: BatchSkuInput, opts: ScanRulesOptions): SkuScanResu
   ) {
     return {
       sku,
-      role: 'B2B Equipment SKU',
-      opportunity: lang ? 'Enterprise / warehouse scenario' : 'B2B / 仓库场景',
+      role: 'b2bEquipment',
+      opportunity: 'b2bScenario' as OpportunityKey,
       risk: missing.length
-        ? (lang ? 'Compatibility unclear' : '兼容性未知')
-        : (lang ? 'Long sales cycle' : '销售周期长'),
+        ? ('compatibilityUnclear' as IssueKey)
+        : ('longSalesCycle' as IssueKey),
       priority: 'B',
-      nextAction: lang ? 'Run full diagnosis' : '运行详细诊断',
-      reasons: [lang ? 'Rule: B2B equipment' : '规则：B2B 设备'],
+      nextAction: 'runFullDiagnosis' as ActionKey,
+      rule: 'b2b' as RuleKey,
     };
   }
 
   // ---- 兜底：信息不足 / 通用 SKU ----
   return {
     sku,
-    role: 'Generic SKU',
-    opportunity: lang ? 'To be confirmed' : '待定',
+    role: 'generic',
+    opportunity: 'toBeConfirmed' as OpportunityKey,
     risk: missing.length
-      ? (lang ? 'Information incomplete' : '信息不完整')
-      : (lang ? 'No clear role detected' : '未识别出明确经营角色'),
+      ? ('informationIncomplete' as IssueKey)
+      : ('noRoleDetected' as IssueKey),
     priority: 'C',
     nextAction: missing.length
-      ? (lang ? 'Complete product card first' : '先补全商品信息')
-      : (lang ? 'Run full diagnosis' : '运行详细诊断'),
-    reasons: [lang ? 'Rule: Default' : '规则：默认 / 兜底'],
+      ? ('completeProductCard' as ActionKey)
+      : ('runFullDiagnosis' as ActionKey),
+    rule: 'generic' as RuleKey,
   };
 }
 
 /** 批量扫描 */
-export function scanSkus(skus: BatchSkuInput[], opts: ScanRulesOptions): SkuScanResult[] {
+export function scanSkus(skus: BatchSkuInput[], opts?: ScanRulesOptions): SkuScanResult[] {
   return skus.map(s => scanSku(s, opts));
 }
 
@@ -163,7 +164,6 @@ function parseCsvLine(line: string): string[] {
   for (let i = 0; i < line.length; i++) {
     const ch = line[i];
     if (ch === '"') {
-      // 跳过紧跟的下一个引号（"" 表示一个引号）
       if (inQuotes && line[i + 1] === '"') {
         cur += '"';
         i++;
@@ -199,7 +199,6 @@ export function parseCsv(text: string): CsvParseResult {
   }
 
   const header = parseCsvLine(lines[0]).map(s => s.toLowerCase());
-  // 必填列名
   const required = ['product name', 'brand', 'category', 'type'];
   const missing = required.filter(r => !header.includes(r));
   if (missing.length) {
@@ -222,7 +221,7 @@ export function parseCsv(text: string): CsvParseResult {
   for (let i = 1; i < lines.length; i++) {
     const cells = parseCsvLine(lines[i]);
     const productName = cells[idx.productName];
-    if (!productName) continue; // 跳过空行
+    if (!productName) continue;
     skus.push({
       productName,
       brand: cells[idx.brand] ?? '',
@@ -236,33 +235,6 @@ export function parseCsv(text: string): CsvParseResult {
     });
   }
 
-  return { ok: true, skus };
-}
-
-// =============================================================================
-// 手动粘贴（| 分隔）解析
-// =============================================================================
-
-export function parseManual(text: string): CsvParseResult {
-  const lines = text
-    .split(/\r?\n/)
-    .map(l => l.trim())
-    .filter(l => l.length > 0 && !l.startsWith('#'));
-
-  const skus: BatchSkuInput[] = [];
-  for (const line of lines) {
-    const parts = line.split('|').map(s => s.trim());
-    if (parts.length < 4) {
-      return { ok: false, skus: [], error: 'format' };
-    }
-    skus.push({
-      productName: parts[0],
-      brand: parts[1] ?? '',
-      category: parts[2] ?? '',
-      type: parts[3] ?? '',
-      relatedProducts: parts[4] ?? '',
-    });
-  }
   return { ok: true, skus };
 }
 
