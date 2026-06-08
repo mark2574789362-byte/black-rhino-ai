@@ -221,8 +221,8 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
               </div>
             </div>
 
-            {/* 必填区：4 个字段 2x2 网格 */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-2.5">
+            {/* 9 个字段全部直接铺开（4 必填 + 5 选填），不折叠，避免发现不了选填区 */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <FormField fieldKey="productName" k="productName" required />
               <FormField fieldKey="brand" k="brand" required />
               <FormField fieldKey="category" k="category" required />
@@ -249,24 +249,14 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
                   ))}
                 </div>
               </div>
-            </div>
-
-            {/* 选填区：5 个字段，单列布局避免拥挤 */}
-            <details className="group">
-              <summary className="text-[11px] text-[#737373] hover:text-[#a3a3a3] cursor-pointer list-none flex items-center gap-1 select-none">
-                <Plus size={11} className="group-open:rotate-45 transition-transform" />
-                {t('scanner', 'manualCard', 'optionalSummary')}
-              </summary>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
-                <FormField fieldKey="price" k="price" />
-                <FormField fieldKey="description" k="description" />
-                <FormField fieldKey="currentSellingPoints" k="currentSellingPoints" />
-                <FormField fieldKey="relatedProducts" k="relatedProducts" />
-                <div className="sm:col-span-2">
-                  <FormField fieldKey="reviewSamples" k="reviewSamples" />
-                </div>
+              <FormField fieldKey="price" k="price" />
+              <FormField fieldKey="description" k="description" />
+              <FormField fieldKey="currentSellingPoints" k="currentSellingPoints" />
+              <FormField fieldKey="relatedProducts" k="relatedProducts" />
+              <div className="sm:col-span-2">
+                <FormField fieldKey="reviewSamples" k="reviewSamples" />
               </div>
-            </details>
+            </div>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <button
@@ -275,6 +265,17 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
               >
                 <Play size={12} />
                 {t('scanner', 'manualCard', 'addBtn')}
+              </button>
+              {/* 「再添加一条」常驻可见：清空当前表单（保留已扫描 pending） */}
+              <button
+                onClick={() => {
+                  setForm(EMPTY_FORM);
+                  setError(null);
+                }}
+                className="text-xs px-3 py-2 rounded-lg border border-[#2a2a2a] text-[#a3a3a3] hover:border-orange-500/50 hover:text-orange-500 flex items-center gap-1.5 transition-colors"
+              >
+                <Plus size={12} />
+                {t('scanner', 'manualCard', 'addAnother')}
               </button>
               {pendingSkus.length > 0 && (
                 <button
@@ -287,7 +288,7 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
               )}
               {pendingSkus.length > 0 && (
                 <span className="text-[10px] text-[#737373]">
-                  · {pendingSkus.length} pending
+                  · {pendingSkus.length} {t('scanner', 'board', 'cols', 'sku')}
                 </span>
               )}
             </div>

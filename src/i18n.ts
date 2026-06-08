@@ -193,8 +193,8 @@ export const I18N = {
     manualCard: {
       title: { zh: '或手动添加 SKU 记录', en: 'Or add SKU records manually' },
       hint: {
-        zh: '补全以下字段，点击「添加并扫描」加入扫描器；需要多条可连续点击。',
-        en: 'Fill in the fields below, then click Add & Scan. Repeat to add multiple SKUs.',
+        zh: '9 个字段全部铺开（带 * 为必填）。点击「添加并扫描」加入面板。',
+        en: 'All 9 fields are shown above (* = required). Click Add & Scan to add to the board.',
       },
       fields: {
         productName: { zh: '商品名称 *', en: 'Product Name *' },
