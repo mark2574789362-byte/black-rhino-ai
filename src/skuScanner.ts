@@ -3,7 +3,8 @@
  * ------------------------------------------------------------
  * 设计原则：
  *  - 不调 AI，完全在前端用规则跑（第一阶段）
- *  - 5 类规则：耗材 / 设备+耗材 / 3C / B2B / 信息不足
+ *  - 7 类商品类型（productType）+ 6 类经营场景（businessScenario）
+ *  - 规则按业务重要度排序：businessScenario 显式 > productType + 关键词推断
  *  - 输出统一的 SkuScanResult，所有文案都是 i18n key，由 UI 层翻译
  *  - 不依赖外部 lang 参数，避免之前 lang 三元表达式的判断错误
  * ------------------------------------------------------------
@@ -12,6 +13,7 @@
 import type {
   BatchSkuInput, SkuScanResult, ProductInfo,
   RuleKey, IssueKey, OpportunityKey, ActionKey,
+  ProductType, BusinessScenarioKey,
 } from './types';
 
 // 字段匹配工具：大小写不敏感 + 包含关系
@@ -31,11 +33,24 @@ export interface ScanRulesOptions {
 }
 
 /**
- * 单条 SKU 扫描：按优先级匹配规则，命中后立即返回
- * 规则按业务重要度排序：耗材复购 > 设备+耗材 > 3C > B2B > 兜底
+ * 显式经营场景映射（如果用户在 businessScenario 里选了，直接采纳）
+ * 仅在 productType 与关键词推断不一致时作为辅助
+ */
+const EXPLICIT_SCENARIO_TO_RESULT: Record<BusinessScenarioKey, Partial<SkuScanResult>> = {
+  hardwareEntry:         { role: 'hardwareEntry',         opportunity: 'consumableAttach',       priority: 'A', nextAction: 'runFullDiagnosis',       rule: 'hardwareAttach' },
+  repeatPurchase:        { role: 'repeatPurchase',        opportunity: 'ltvGrowth',              priority: 'A', nextAction: 'buildBundlePlan',        rule: 'consumable' },
+  competitiveElectronics:{ role: 'competitiveElectronics',opportunity: 'scenarioDifferentiation',priority: 'B', nextAction: 'improveSellingPoints',   rule: 'competitive3C' },
+  b2bSolution:           { role: 'b2bEquipment',          opportunity: 'b2bScenario',            priority: 'B', nextAction: 'runFullDiagnosis',       rule: 'b2b' },
+  highTicketDurable:     { role: 'highTicketDurable',     opportunity: 'trustServiceAssurance',  priority: 'B', nextAction: 'runFullDiagnosis',       rule: 'appliance' },
+  generic:               { role: 'generic',               opportunity: 'toBeConfirmed',          priority: 'C', nextAction: 'completeProductCard',    rule: 'generic' },
+};
+
+/**
+ * 单条 SKU 扫描：按优先级匹配规则
+ * 优先级：显式 businessScenario > productType + 关键词 > 兜底
  */
 export function scanSku(sku: BatchSkuInput, _opts: ScanRulesOptions = {}): SkuScanResult {
-  const type = (sku.type || '').toLowerCase();
+  const productType: ProductType = sku.productType;
   const category = sku.category || '';
   const related = sku.relatedProducts || '';
 
@@ -46,18 +61,36 @@ export function scanSku(sku: BatchSkuInput, _opts: ScanRulesOptions = {}): SkuSc
   if (!related) missing.push('relatedProducts');
   if (!sku.currentSellingPoints) missing.push('currentSellingPoints');
 
-  // ---- 规则 1：耗材类（标签/碳带/卷纸等）----
+  // ---- 优先级 0：显式 businessScenario（用户主动选填）----
+  if (sku.businessScenario) {
+    const explicit = EXPLICIT_SCENARIO_TO_RESULT[sku.businessScenario];
+    if (explicit) {
+      return {
+        sku,
+        role: explicit.role!,
+        opportunity: explicit.opportunity!,
+        // 风险仍然根据信息完整度判断（用户选了 scenario 不代表信息齐）
+        risk: missing.length
+          ? ('informationIncomplete' as IssueKey)
+          : ('noRoleDetected' as IssueKey),
+        priority: explicit.priority!,
+        nextAction: explicit.nextAction!,
+        rule: explicit.rule!,
+      };
+    }
+  }
+
+  // ---- 规则 1：耗材类（type=Consumable 或类目含耗材关键词）----
   // 注意：设备型打印机类目可能含 "label"（如 Business Label Printer），
-  // 需要排除这类设备型业务。判定逻辑：type=consumable，或者类目词表达“耗材”本身。
+  // 需要排除这类设备型业务。
   const isConsumableCategory =
     contains(category, 'consumable') ||
     contains(category, 'roll') ||
     contains(category, 'tape') ||
     contains(category, 'ribbon') ||
-    // 包含 "label" 但后面跟 roll/paper/sticker 等才是耗材
     (contains(category, 'label') && (contains(category, 'roll') || contains(category, 'paper') || contains(category, 'sticker')));
 
-  if (type === 'consumable' || isConsumableCategory) {
+  if (productType === 'Consumable' || isConsumableCategory) {
     return {
       sku,
       role: 'repeatPurchase',
@@ -73,7 +106,7 @@ export function scanSku(sku: BatchSkuInput, _opts: ScanRulesOptions = {}): SkuSc
 
   // ---- 规则 2：设备 + 耗材（硬件入口 SKU）----
   if (
-    (type === 'hardware' || type === '') &&
+    (productType === 'Hardware' || productType === 'B2B Equipment') &&
     relatedHasAny(related, ['label', 'tape', 'consumable', 'ink', 'ribbon', 'roll', 'cartridge'])
   ) {
     return {
@@ -89,7 +122,7 @@ export function scanSku(sku: BatchSkuInput, _opts: ScanRulesOptions = {}): SkuSc
     };
   }
 
-  // ---- 规则 3：3C 同质化竞争（Baseus / 充电宝 / 数据线 / HUB）----
+  // ---- 规则 3：3C 同质化竞争（Baseus / 充电宝 / 数据线 / HUB / 配件）----
   if (
     contains(sku.brand, 'baseus') ||
     contains(category, 'power bank') ||
@@ -97,7 +130,8 @@ export function scanSku(sku: BatchSkuInput, _opts: ScanRulesOptions = {}): SkuSc
     contains(category, 'cable') ||
     contains(category, 'hub') ||
     contains(category, 'earphone') ||
-    contains(category, 'earbud')
+    contains(category, 'earbud') ||
+    productType === 'Accessory'
   ) {
     return {
       sku,
@@ -110,8 +144,9 @@ export function scanSku(sku: BatchSkuInput, _opts: ScanRulesOptions = {}): SkuSc
     };
   }
 
-  // ---- 规则 4：B2B 仓储设备（条码 / 扫描枪 / 仓库 / 工业打印机）----
+  // ---- 规则 4：B2B 仓储设备 ----
   if (
+    productType === 'B2B Equipment' ||
     contains(category, 'barcode') ||
     contains(category, 'scanner') ||
     contains(category, 'warehouse') ||
@@ -128,6 +163,51 @@ export function scanSku(sku: BatchSkuInput, _opts: ScanRulesOptions = {}): SkuSc
       priority: 'B',
       nextAction: 'runFullDiagnosis' as ActionKey,
       rule: 'b2b' as RuleKey,
+    };
+  }
+
+  // ---- 规则 5：家具 / 家居（新增）----
+  if (
+    productType === 'Furniture' ||
+    contains(category, 'furniture') ||
+    contains(category, 'chair') ||
+    contains(category, 'desk') ||
+    contains(category, 'living') ||
+    contains(category, 'sofa') ||
+    contains(category, 'bed')
+  ) {
+    return {
+      sku,
+      role: 'homeOfficeLiving',
+      opportunity: 'scenarioSelling' as OpportunityKey,
+      risk: missing.length
+        ? ('deliveryAssemblyUnclear' as IssueKey)
+        : ('deliveryAssemblyUnclear' as IssueKey),
+      priority: 'B',
+      nextAction: 'improveListingDetails' as ActionKey,
+      rule: 'furniture' as RuleKey,
+    };
+  }
+
+  // ---- 规则 6：大家电（新增）----
+  if (
+    productType === 'Appliance' ||
+    contains(category, 'fridge') ||
+    contains(category, 'refrigerator') ||
+    contains(category, 'washing machine') ||
+    contains(category, 'tv') ||
+    contains(category, 'appliance')
+  ) {
+    return {
+      sku,
+      role: 'highTicketDurable',
+      opportunity: 'trustServiceAssurance' as OpportunityKey,
+      risk: missing.length
+        ? ('warrantyDeliveryUnclear' as IssueKey)
+        : ('warrantyDeliveryUnclear' as IssueKey),
+      priority: 'B',
+      nextAction: 'runFullDiagnosis' as ActionKey,
+      rule: 'appliance' as RuleKey,
     };
   }
 
@@ -187,6 +267,16 @@ export interface CsvParseResult {
   error?: string;
 }
 
+/** 把 CSV 字符串里的 type 列值映射为合法 ProductType，非法则归一为 'Hardware' */
+function normalizeProductType(raw: string): ProductType {
+  const v = (raw || '').trim();
+  const valid: ProductType[] = [
+    'Hardware', 'Consumable', 'Accessory', 'Bundle',
+    'Furniture', 'Appliance', 'B2B Equipment',
+  ];
+  return valid.includes(v as ProductType) ? (v as ProductType) : 'Hardware';
+}
+
 /** 解析 CSV 文本 → SKU 数组 */
 export function parseCsv(text: string): CsvParseResult {
   const lines = text
@@ -226,7 +316,7 @@ export function parseCsv(text: string): CsvParseResult {
       productName,
       brand: cells[idx.brand] ?? '',
       category: cells[idx.category] ?? '',
-      type: cells[idx.type] ?? '',
+      productType: normalizeProductType(cells[idx.type] ?? ''),
       price: idx.price >= 0 ? cells[idx.price] : '',
       description: idx.description >= 0 ? cells[idx.description] : '',
       currentSellingPoints: idx.currentSellingPoints >= 0 ? cells[idx.currentSellingPoints] : '',
@@ -268,7 +358,7 @@ export function batchToProduct(sku: BatchSkuInput): ProductInfo {
     currentSellingPoints: sku.currentSellingPoints ?? '',
     channel: 'Both',
     targetUser: 'All',
-    consumable: (sku.type || '').toLowerCase() === 'consumable',
+    consumable: sku.productType === 'Consumable',
     relatedProducts: sku.relatedProducts ?? '',
     reviewSamples: sku.reviewSamples ?? '',
     productUrl: '',

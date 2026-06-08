@@ -7,7 +7,9 @@ import {
 import { useLang } from './i18n';
 import {
   DEMO_PRODUCTS, SKU_CSV_TEMPLATE,
+  PRODUCT_TYPES, BUSINESS_SCENARIOS,
   type BatchSkuInput, type SkuScanResult, type RuleKey,
+  type ProductType, type BusinessScenarioKey,
 } from './types';
 import {
   parseCsv, scanSkus, triggerTemplateDownload, batchToProduct,
@@ -33,7 +35,8 @@ const EMPTY_FORM: BatchSkuInput = {
   productName: '',
   brand: '',
   category: '',
-  type: 'Hardware',
+  productType: 'Hardware',
+  businessScenario: undefined,
   price: '',
   description: '',
   currentSellingPoints: '',
@@ -85,7 +88,7 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
 
   // ---------- 手动添加：Add & Scan ----------
   const handleAddAndScan = () => {
-    if (!form.productName.trim() || !form.brand.trim() || !form.category.trim() || !form.type.trim()) {
+    if (!form.productName.trim() || !form.brand.trim() || !form.category.trim() || !form.productType) {
       setError(t('scanner', 'manualCard', 'requiredMissing'));
       return;
     }
@@ -114,7 +117,7 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
       productName: demo.product.productName,
       brand: demo.product.brand,
       category: demo.product.category,
-      type: demo.product.consumable ? 'Consumable' : 'Hardware',
+      productType: demo.product.consumable ? 'Consumable' : 'Hardware',
       price: demo.product.price,
       description: demo.product.description,
       currentSellingPoints: demo.product.currentSellingPoints,
@@ -237,27 +240,25 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
             <FormField fieldKey="productName" k="productName" required />
             <FormField fieldKey="brand" k="brand" required />
             <FormField fieldKey="category" k="category" required />
+            {/* Product Type：下拉选择（7 选 1） */}
             <div className="space-y-1">
               <label className="text-[10px] font-medium text-[#a3a3a3] uppercase tracking-wide">
-                {t('scanner', 'manualCard', 'fields', 'type')}
+                {t('scanner', 'manualCard', 'fields', 'productType')}
               </label>
-              <div className="grid grid-cols-2 gap-1">
-                {(['Hardware', 'Consumable'] as const).map(v => (
-                  <button
-                    key={v}
-                    onClick={() => setForm({ ...form, type: v })}
-                    className={`text-[11px] py-1.5 rounded-md border transition-colors ${
-                      form.type === v
-                        ? 'border-orange-500 bg-orange-500/10 text-orange-500'
-                        : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
-                    }`}
-                  >
-                    {v === 'Hardware'
-                      ? t('scanner', 'manualCard', 'fields', 'typeHardware')
-                      : t('scanner', 'manualCard', 'fields', 'typeConsumable')}
-                  </button>
+              <select
+                value={form.productType}
+                onChange={(e) => setForm({ ...form, productType: e.target.value as ProductType })}
+                className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-md px-2 py-1.5 text-xs text-[#e5e5e5] focus:border-orange-500 transition-colors"
+              >
+                {PRODUCT_TYPES.map((v) => (
+                  <option key={v} value={v}>
+                    {t('scanner', 'manualCard', 'productTypes', v)}
+                  </option>
                 ))}
-              </div>
+              </select>
+              <p className="text-[9px] text-[#525252] leading-tight">
+                {t('scanner', 'manualCard', 'fields', 'productTypeHint')}
+              </p>
             </div>
           </div>
 
@@ -271,6 +272,32 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
           </button>
           {showAdvanced && (
             <div className="grid grid-cols-2 gap-2 mb-2">
+              {/* Business Scenario：选填下拉，默认空 · 自动判断 */}
+              <div className="space-y-1 col-span-2">
+                <label className="text-[10px] font-medium text-[#a3a3a3] uppercase tracking-wide">
+                  {t('scanner', 'manualCard', 'fields', 'businessScenario')}
+                </label>
+                <select
+                  value={form.businessScenario ?? ''}
+                  onChange={(e) => setForm({
+                    ...form,
+                    businessScenario: (e.target.value || undefined) as BusinessScenarioKey | undefined,
+                  })}
+                  className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-md px-2 py-1.5 text-xs text-[#e5e5e5] focus:border-orange-500 transition-colors"
+                >
+                  <option value="">
+                    {t('scanner', 'manualCard', 'fields', 'businessScenarioPlaceholder')}
+                  </option>
+                  {BUSINESS_SCENARIOS.map((v) => (
+                    <option key={v} value={v}>
+                      {t('scanner', 'manualCard', 'businessScenarios', v)}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-[9px] text-[#525252] leading-tight">
+                  {t('scanner', 'manualCard', 'fields', 'businessScenarioHint')}
+                </p>
+              </div>
               <FormField fieldKey="price" k="price" />
               <FormField fieldKey="description" k="description" />
               <FormField fieldKey="currentSellingPoints" k="currentSellingPoints" />
@@ -384,7 +411,7 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
                       <td className="px-3 py-2.5 text-[#e5e5e5] font-medium align-top">
                         {r.sku.productName}
                         <div className="text-[10px] text-[#525252] mt-0.5">
-                          {r.sku.brand} · {r.sku.category} · {r.sku.type}
+                          {r.sku.brand} · {r.sku.category} · {r.sku.productType}
                         </div>
                         <div className="text-[10px] text-[#525252] mt-0.5 italic">
                           {t('scanner', 'rule', r.rule as RuleKey)}
@@ -432,7 +459,7 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
                         {r.sku.productName}
                       </div>
                       <div className="text-[10px] text-[#525252] mt-0.5">
-                        {r.sku.brand} · {r.sku.category} · {r.sku.type}
+                        {r.sku.brand} · {r.sku.category} · {r.sku.productType}
                       </div>
                     </div>
                   </div>

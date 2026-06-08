@@ -45,14 +45,53 @@ export interface MetricItem {
 // ================ 批量 SKU 扫描 ================
 
 /**
- * 批量扫描的最小 SKU 记录（来自 CSV / 手动粘贴 / Demo）
- * Product Name / Brand / Category / Type 是规则扫描的最低要求
+ * 商品类型（描述「商品本身是什么」）
+ * Type 是必填项，用于规则扫描。共 7 个枚举，UI 用下拉选择。
+ */
+export type ProductType =
+  | 'Hardware'        // 硬件设备
+  | 'Consumable'       // 耗材
+  | 'Accessory'        // 配件
+  | 'Bundle'           // 套餐 / 组合包
+  | 'Furniture'        // 家具 / 家居
+  | 'Appliance'        // 大家电
+  | 'B2B Equipment';   // B2B 仓储设备
+
+/** 7 个商品类型枚举值（用于下拉选项、CSV 校验） */
+export const PRODUCT_TYPES: ProductType[] = [
+  'Hardware', 'Consumable', 'Accessory', 'Bundle',
+  'Furniture', 'Appliance', 'B2B Equipment',
+];
+
+/**
+ * 经营场景（描述「该 SKU 在运营中承担什么角色」）
+ * 选填项；不选时系统根据 Brand / Category / Related Products 自动判断。
+ */
+export type BusinessScenarioKey =
+  | 'hardwareEntry'         // 设备入口款
+  | 'repeatPurchase'        // 复购耗材款
+  | 'competitiveElectronics'// 3C 竞争款
+  | 'b2bSolution'           // B2B 方案款
+  | 'highTicketDurable'     // 高客单耐用品
+  | 'generic';              // 普通 SKU
+
+/** 6 个经营场景枚举值（用于下拉选项） */
+export const BUSINESS_SCENARIOS: BusinessScenarioKey[] = [
+  'hardwareEntry', 'repeatPurchase', 'competitiveElectronics',
+  'b2bSolution', 'highTicketDurable', 'generic',
+];
+
+/**
+ * 批量扫描的最小 SKU 记录（来自 CSV / 手动表单 / Demo）
+ * Product Name / Brand / Category / ProductType 是必填项；
+ * BusinessScenario 是选填项，未填时系统自动判断。
  */
 export interface BatchSkuInput {
   productName: string;
   brand: string;
   category: string;
-  type: string; // "Hardware" | "Consumable" | 其他自由值
+  productType: ProductType;            // 必填 · 商品本身是什么
+  businessScenario?: BusinessScenarioKey; // 选填 · 运营中承担什么角色
   price?: string;
   description?: string;
   currentSellingPoints?: string;
@@ -66,6 +105,8 @@ export type SkuRole =
   | 'repeatPurchase'
   | 'competitiveElectronics'
   | 'b2bEquipment'
+  | 'homeOfficeLiving'    // 新增：家具 / 家居
+  | 'highTicketDurable'   // 新增：大家电 / 高客单耐用品
   | 'generic';
 
 /** 规则名 key（命中提示 / tooltip 使用） */
@@ -74,6 +115,8 @@ export type RuleKey =
   | 'hardwareAttach'
   | 'competitive3C'
   | 'b2b'
+  | 'furniture'           // 新增
+  | 'appliance'           // 新增
   | 'generic';
 
 /** 问题 / 风险枚举 key */
@@ -85,7 +128,9 @@ export type IssueKey =
   | 'priceCompetition'
   | 'longSalesCycle'
   | 'compatibilityUnclear'
-  | 'noRoleDetected';
+  | 'noRoleDetected'
+  | 'deliveryAssemblyUnclear' // 新增：家具 / 家居
+  | 'warrantyDeliveryUnclear';// 新增：大家电
 
 /** 机会枚举 key */
 export type OpportunityKey =
@@ -93,6 +138,8 @@ export type OpportunityKey =
   | 'consumableAttach'
   | 'scenarioDifferentiation'
   | 'b2bScenario'
+  | 'scenarioSelling'         // 新增：家具 / 家居 · 场景化销售
+  | 'trustServiceAssurance'   // 新增：大家电 · 信任与服务保障
   | 'toBeConfirmed';
 
 /** 下一步动作枚举 key */
@@ -100,7 +147,8 @@ export type ActionKey =
   | 'buildBundlePlan'
   | 'runFullDiagnosis'
   | 'improveSellingPoints'
-  | 'completeProductCard';
+  | 'completeProductCard'
+  | 'improveListingDetails'; // 新增：家具 / 家居 · 完善商品详情
 
 /** 优先级：A > B > C */
 export type Priority = 'A' | 'B' | 'C';
@@ -115,11 +163,15 @@ export interface SkuScanResult {
   rule: RuleKey; // 命中的规则名 key，用于表格 tooltip
 }
 
-/** CSV 模板（前端 Download Template 直接生成） */
+/** CSV 模板（前端 Download Template 直接生成）
+ * Type 取值：Hardware / Consumable / Accessory / Bundle / Furniture / Appliance / B2B Equipment
+ */
 export const SKU_CSV_TEMPLATE = `Product Name,Brand,Category,Type,Price,Description,Current Selling Points,Related Products,Review Samples
 Niimbot B21 Label Printer,Niimbot,Business Label Printer,Hardware,899 ZAR,Portable thermal label printer,Portable; Bluetooth; No ink,Series B Labels; Transparent Labels,Easy setup; good for small business
 Niimbot Series B Label Rolls,Niimbot,Label Consumables,Consumable,129 ZAR,Thermal labels for B21/B1/B3S,Compatible; Easy Peel,Niimbot B21; Niimbot B1,Will reorder
 Baseus 20000mAh Power Bank,Baseus,Power Bank,Hardware,599 ZAR,65W portable charger,Fast charging; Dual port,USB-C Cable; Travel Pouch,Good capacity but heavy
+Office Chair,Black Rhino Living,Office Furniture,Furniture,1299 ZAR,Ergonomic office chair,Comfortable; Adjustable; Home office,,Comfortable but assembly takes time
+Hisense Fridge,Hisense,Appliance,Appliance,7999 ZAR,Large-capacity refrigerator,Energy saving; Warranty; Delivery service,,Good size but delivery timing matters
 `;
 
 export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
