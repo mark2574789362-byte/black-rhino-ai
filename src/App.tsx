@@ -957,27 +957,50 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0f0f0f]">
-      {/* Header */}
-      <header className="border-b border-[#1a1a1a] px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">BR</span>
+      {/* Hero Header */}
+      <header className="border-b border-[#1a1a1a] bg-gradient-to-b from-[#141414] to-[#0f0f0f]">
+        <div className="max-w-7xl mx-auto px-6 pt-5 pb-4">
+          {/* Top bar: logo + lang switcher + prompt toggle */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-orange-600 flex items-center justify-center">
+                <span className="text-white font-bold text-sm">BR</span>
+              </div>
+              <h1 className="text-base font-semibold text-[#e5e5e5] leading-tight">
+                {tr(I18N.page.title)}
+              </h1>
             </div>
-            <div>
-              <h1 className="text-sm font-semibold text-[#e5e5e5]">{tr(I18N.page.title)}</h1>
-              <p className="text-xs text-[#737373]">{tr(I18N.page.subtitle)}</p>
+            <div className="flex items-center gap-2">
+              <LangSwitcher />
+              <button
+                onClick={() => setShowPrompt(!showPrompt)}
+                className="text-xs text-[#737373] hover:text-orange-500 transition-colors flex items-center gap-1.5"
+              >
+                <FileText size={13} />
+                {showPrompt ? tr(I18N.header.hidePrompt) : tr(I18N.header.showPrompt)}
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <LangSwitcher />
-            <button
-              onClick={() => setShowPrompt(!showPrompt)}
-              className="text-xs text-[#737373] hover:text-orange-500 transition-colors flex items-center gap-1.5"
-            >
-              <FileText size={13} />
-              {showPrompt ? tr(I18N.header.hidePrompt) : tr(I18N.header.showPrompt)}
-            </button>
+
+          {/* Hero pitch */}
+          <p className="text-sm text-[#a3a3a3] leading-relaxed max-w-3xl mb-3">
+            {tr(I18N.page.hero.pitch)}
+          </p>
+
+          {/* 3 能力标签 */}
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-500">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-500" />
+              {tr(I18N.page.hero.chips.csv)}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+              {tr(I18N.page.hero.chips.ruleScan)}
+            </span>
+            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-[#1f1f1f] border border-[#2a2a2a] text-[#e5e5e5]">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#a3a3a3]" />
+              {tr(I18N.page.hero.chips.aiDiagnosis)}
+            </span>
           </div>
         </div>
       </header>

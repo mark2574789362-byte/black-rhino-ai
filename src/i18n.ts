@@ -169,6 +169,17 @@ export const I18N = {
       zh: '基于公开商品信息，模拟 AI 如何帮助运营人员完成 SKU 初筛、单品诊断、Bundle 机会识别与上线后数据验证。',
       en: 'A lightweight workflow showing how AI can support SKU prioritization, product diagnosis, bundle opportunity discovery and post-launch metric validation.',
     },
+    hero: {
+      pitch: {
+        zh: '先批量筛选 SKU 优先级，再对重点 SKU 做 AI 深度诊断。适用于多品牌、多 SKU、多渠道运营场景。',
+        en: 'Filter SKU priorities in batch first, then run AI deep-diagnosis on the SKUs that matter. Built for multi-brand, multi-SKU, multi-channel operations.',
+      },
+      chips: {
+        csv: { zh: 'CSV 导入', en: 'CSV Import' },
+        ruleScan: { zh: '规则优先级扫描', en: 'Rule-based Priority Scan' },
+        aiDiagnosis: { zh: 'AI 单品诊断', en: 'AI Single-SKU Diagnosis' },
+      },
+    },
   },
 
   // ============ Batch SKU Scanner ============
@@ -177,11 +188,34 @@ export const I18N = {
       zh: 'SKU 运营优先级扫描器',
       en: 'SKU Priority Scanner',
     },
+    entry: {
+      demo: {
+        title: { zh: 'Load Business Demo', en: 'Load Business Demo' },
+        desc: {
+          zh: '快速体验业务场景，一键加载进扫描器。',
+          en: 'Try a real business scenario in one click.',
+        },
+      },
+      upload: {
+        title: { zh: 'Upload SKU File', en: 'Upload SKU File' },
+        desc: {
+          zh: '当前版本支持 CSV 上传，Excel 模板可另存为 CSV 后导入。',
+          en: 'Currently supports CSV. Excel template can be saved as CSV before upload.',
+        },
+      },
+      manual: {
+        title: { zh: 'Paste SKU Manually', en: 'Paste SKU Manually' },
+        desc: {
+          zh: '补全 4 个必填字段，点击「添加并扫描」逐条输入。',
+          en: 'Fill 4 required fields and click Add & Scan to enter row by row.',
+        },
+      },
+    },
     uploadCard: {
       title: { zh: '上传 SKU 文件', en: 'Upload SKU File' },
       hint: {
-        zh: '支持 CSV / Excel 模板数据。当前版本建议将 Excel 另存为 CSV 后上传。',
-        en: 'Supports CSV / Excel template data. For this version, save Excel as CSV before uploading.',
+        zh: '当前版本支持 CSV 上传，Excel 模板可另存为 CSV 后导入。',
+        en: 'Currently supports CSV. Excel template can be saved as CSV before upload.',
       },
       downloadTemplate: { zh: '下载模板', en: 'Download Template' },
       uploadCsv: { zh: '上传 CSV', en: 'Upload CSV' },
@@ -193,8 +227,8 @@ export const I18N = {
     manualCard: {
       title: { zh: '或手动添加 SKU 记录', en: 'Or add SKU records manually' },
       hint: {
-        zh: '9 个字段全部铺开（带 * 为必填）。点击「添加并扫描」加入面板。',
-        en: 'All 9 fields are shown above (* = required). Click Add & Scan to add to the board.',
+        zh: '默认只显示 4 个必填字段，展开「Advanced fields」填选填字段。',
+        en: 'Only 4 required fields shown by default. Expand "Advanced fields" for optional ones.',
       },
       fields: {
         productName: { zh: '商品名称 *', en: 'Product Name *' },
@@ -212,7 +246,7 @@ export const I18N = {
       addBtn: { zh: '添加并扫描', en: 'Add & Scan' },
       addAnother: { zh: '再添加一条', en: 'Add another row' },
       clearBtn: { zh: '清空已添加', en: 'Clear added' },
-      optionalSummary: { zh: '选填字段（5 个）', en: 'Optional fields (5)' },
+      optionalSummary: { zh: 'Advanced fields（5 个选填）', en: 'Advanced fields (5 optional)' },
       requiredMissing: {
         zh: '请至少补全商品名称 / 品牌 / 类目 / 类型 4 个必填字段。',
         en: 'Please fill in at least the 4 required fields: Name / Brand / Category / Type.',
