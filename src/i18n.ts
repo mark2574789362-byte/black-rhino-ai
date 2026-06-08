@@ -190,24 +190,24 @@ export const I18N = {
     },
     entry: {
       demo: {
-        title: { zh: 'Load Business Demo', en: 'Load Business Demo' },
+        title: { zh: '加载业务场景', en: 'Load Business Demo' },
         desc: {
           zh: '快速体验业务场景，一键加载进扫描器。',
-          en: 'Try a real business scenario in one click.',
+          en: '快速体验业务场景，一键加载进扫描器。',
         },
       },
       upload: {
-        title: { zh: 'Upload SKU File', en: 'Upload SKU File' },
+        title: { zh: '上传 SKU 文件', en: 'Upload SKU File' },
         desc: {
           zh: '当前版本支持 CSV 上传，Excel 模板可另存为 CSV 后导入。',
-          en: 'Currently supports CSV. Excel template can be saved as CSV before upload.',
+          en: '当前版本支持 CSV 上传，Excel 模板可另存为 CSV 后导入。',
         },
       },
       manual: {
-        title: { zh: 'Paste SKU Manually', en: 'Paste SKU Manually' },
+        title: { zh: '手动添加 SKU', en: 'Paste SKU Manually' },
         desc: {
           zh: '补全 4 个必填字段，点击「添加并扫描」逐条输入。',
-          en: 'Fill 4 required fields and click Add & Scan to enter row by row.',
+          en: '补全 4 个必填字段，点击「添加并扫描」逐条输入。',
         },
       },
     },
