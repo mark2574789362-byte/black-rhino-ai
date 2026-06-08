@@ -242,7 +242,9 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
                           : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
                       }`}
                     >
-                      {t('scanner', 'manualCard', 'fields', v === 'Hardware' ? 'typeHardware' : 'typeConsumable')}
+                      {v === 'Hardware'
+                        ? t('scanner', 'manualCard', 'fields', 'typeHardware')
+                        : t('scanner', 'manualCard', 'fields', 'typeConsumable')}
                     </button>
                   ))}
                 </div>
@@ -253,9 +255,7 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
             <details className="group">
               <summary className="text-[11px] text-[#737373] hover:text-[#a3a3a3] cursor-pointer list-none flex items-center gap-1 select-none">
                 <Plus size={11} className="group-open:rotate-45 transition-transform" />
-                {t('scanner', 'manualCard', 'fields', 'price').includes('optional')
-                  ? t('scanner', 'manualCard', 'fields', 'price').replace(' (选填)', '').replace(' (optional)', '')
-                  : 'Optional fields'}
+                {t('scanner', 'manualCard', 'optionalSummary')}
               </summary>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mt-2.5">
                 <FormField fieldKey="price" k="price" />
@@ -282,7 +282,7 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
                   className="text-xs px-3 py-2 rounded-lg border border-[#2a2a2a] text-[#737373] hover:text-red-400 hover:border-red-400/40 flex items-center gap-1.5 transition-colors"
                 >
                   <Trash2 size={12} />
-                  {t('scanner', 'manualCard', 'addAnother')}
+                  {t('scanner', 'manualCard', 'clearBtn')}
                 </button>
               )}
               {pendingSkus.length > 0 && (

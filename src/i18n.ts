@@ -178,13 +178,13 @@ export const I18N = {
       en: 'SKU Priority Scanner',
     },
     uploadCard: {
-      title: { zh: 'Upload SKU File', en: 'Upload SKU File' },
+      title: { zh: '上传 SKU 文件', en: 'Upload SKU File' },
       hint: {
         zh: '支持 CSV / Excel 模板数据。当前版本建议将 Excel 另存为 CSV 后上传。',
         en: 'Supports CSV / Excel template data. For this version, save Excel as CSV before uploading.',
       },
-      downloadTemplate: { zh: 'Download Template', en: 'Download Template' },
-      uploadCsv: { zh: 'Upload CSV', en: 'Upload CSV' },
+      downloadTemplate: { zh: '下载模板', en: 'Download Template' },
+      uploadCsv: { zh: '上传 CSV', en: 'Upload CSV' },
       parseError: {
         zh: 'CSV 解析失败：请检查文件是否包含表头 Product Name, Brand, Category, Type。',
         en: 'CSV parse failed: please check the file contains the header Product Name, Brand, Category, Type.',
@@ -211,6 +211,8 @@ export const I18N = {
       },
       addBtn: { zh: '添加并扫描', en: 'Add & Scan' },
       addAnother: { zh: '再添加一条', en: 'Add another row' },
+      clearBtn: { zh: '清空已添加', en: 'Clear added' },
+      optionalSummary: { zh: '选填字段（5 个）', en: 'Optional fields (5)' },
       requiredMissing: {
         zh: '请至少补全商品名称 / 品牌 / 类目 / 类型 4 个必填字段。',
         en: 'Please fill in at least the 4 required fields: Name / Brand / Category / Type.',
