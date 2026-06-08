@@ -193,7 +193,7 @@ export const I18N = {
     manualCard: {
       title: { zh: '或手动添加 SKU 记录', en: 'Or add SKU records manually' },
       hint: {
-        zh: '补全以下字段，点击 Add & Scan 添加到扫描器；需要多条可连续点击。',
+        zh: '补全以下字段，点击「添加并扫描」加入扫描器；需要多条可连续点击。',
         en: 'Fill in the fields below, then click Add & Scan. Repeat to add multiple SKUs.',
       },
       fields: {
@@ -201,8 +201,8 @@ export const I18N = {
         brand: { zh: '品牌 *', en: 'Brand *' },
         category: { zh: '类目 *', en: 'Category *' },
         type: { zh: '类型 *', en: 'Type *' },
-        typeHardware: { zh: '硬件 Hardware', en: 'Hardware' },
-        typeConsumable: { zh: '耗材 Consumable', en: 'Consumable' },
+        typeHardware: { zh: '硬件', en: 'Hardware' },
+        typeConsumable: { zh: '耗材', en: 'Consumable' },
         price: { zh: '价格 (选填)', en: 'Price (optional)' },
         description: { zh: '商品描述 (选填)', en: 'Description (optional)' },
         currentSellingPoints: { zh: '当前卖点 (选填)', en: 'Current Selling Points (optional)' },
@@ -284,7 +284,7 @@ export const I18N = {
     diagnosis: {
       title: { zh: '重点 SKU 详细诊断', en: 'Selected SKU Diagnosis' },
       hint: {
-        zh: '补充 Description / Review Samples / Selling Points 后再点击 Run SKU Diagnosis。',
+        zh: '补充商品描述 / 评价样本 / 卖点后点击「开始诊断」。',
         en: 'Fill in Description / Review Samples / Selling Points, then click Run SKU Diagnosis.',
       },
     },
