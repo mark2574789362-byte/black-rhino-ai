@@ -368,6 +368,8 @@ export function batchToProduct(sku: BatchSkuInput): ProductInfo {
     currentSellingPoints: sku.currentSellingPoints ?? '',
     channel: 'Both',
     targetUser: 'All',
+    productType: sku.productType,
+    businessScenario: sku.businessScenario,
     consumable: sku.productType === 'Consumable',
     relatedProducts: sku.relatedProducts ?? '',
     reviewSamples: sku.reviewSamples ?? '',

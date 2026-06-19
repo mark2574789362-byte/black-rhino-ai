@@ -42,6 +42,7 @@ export const I18N = {
       targetChannel: { zh: '目标渠道', en: 'Target Channel' },
       targetUser: { zh: '目标用户', en: 'Target User' },
       productType: { zh: '商品类型', en: 'Product Type' },
+      businessScenario: { zh: '经营场景', en: 'Business Scenario' },
       consumable: { zh: '耗材类（标签、墨盒等）', en: 'Consumable (labels, ink...)' },
       hardware: { zh: '硬件类（设备、器材）', en: 'Hardware (device, equipment)' },
       relatedProducts: { zh: '关联商品', en: 'Related Products' },

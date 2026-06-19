@@ -5,12 +5,15 @@ import {
   Loader2, Copy, CheckCheck, Languages,
   AlertCircle, CheckCircle2, Info, Briefcase
 } from 'lucide-react';
-import type { ProductInfo, AIOutput } from './types';
+import type { ProductInfo, AIOutput, ProductType, BusinessScenarioKey } from './types';
+import { PRODUCT_TYPES, BUSINESS_SCENARIOS } from './types';
 import { useLang, I18N, type Lang } from './i18n';
 import SkuScanner from './SkuScanner';
 
 const CHANNELS: Array<ProductInfo['channel']> = ['Takealot', 'Independent Store', 'Both'];
 const TARGET_USERS: Array<ProductInfo['targetUser']> = ['Home User', 'Small Business', 'Warehouse/Retail', 'All'];
+
+const getConsumableFromProductType = (productType: ProductType) => productType === 'Consumable';
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -560,20 +563,46 @@ function InputPanel({
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input', 'fields', 'productType')}</label>
           <div className="grid grid-cols-2 gap-2">
-            {([true, false] as const).map((val) => (
+            {PRODUCT_TYPES.map((pt) => (
               <button
-                key={String(val)}
-                onClick={() => onChange({ ...product, consumable: val })}
+                key={pt}
+                onClick={() => onChange({
+                  ...product,
+                  productType: pt,
+                  consumable: getConsumableFromProductType(pt),
+                })}
                 className={`text-xs py-2 rounded-lg border transition-colors ${
-                  product.consumable === val
+                  product.productType === pt
                     ? 'border-orange-500 bg-orange-500/10 text-orange-500'
                     : 'border-[#2a2a2a] text-[#737373] hover:border-[#3a3a3a]'
                 }`}
               >
-                {val ? t('input', 'fields', 'consumable') : t('input', 'fields', 'hardware')}
+                {t('scanner', 'manualCard', 'productTypes', pt)}
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-[#a3a3a3] uppercase tracking-wide">{t('input', 'fields', 'businessScenario')}</label>
+          <select
+            value={product.businessScenario || ''}
+            onChange={(e) => onChange({
+              ...product,
+              businessScenario: (e.target.value || undefined) as BusinessScenarioKey | undefined,
+            })}
+            className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] focus:border-orange-500 transition-colors"
+          >
+            <option value="">{t('scanner', 'manualCard', 'businessScenarioPlaceholder')}</option>
+            {BUSINESS_SCENARIOS.map((scenario) => (
+              <option key={scenario} value={scenario}>
+                {t('scanner', 'manualCard', 'businessScenarios', scenario)}
+              </option>
+            ))}
+          </select>
+          <p className="text-[10px] text-[#525252] leading-relaxed">
+            {t('scanner', 'manualCard', 'businessScenarioHint')}
+          </p>
         </div>
 
         {field('relatedProducts', 'relatedProducts', 'relatedProductsPh', 'textarea')}
@@ -626,7 +655,7 @@ export default function App() {
   const EMPTY_PRODUCT = (): ProductInfo => ({
     productName: '', brand: '', category: '', price: '',
     description: '', currentSellingPoints: '',
-    channel: 'Both', targetUser: 'All', consumable: false,
+    channel: 'Both', targetUser: 'All', productType: 'Hardware', businessScenario: undefined, consumable: false,
     relatedProducts: '', reviewSamples: '', productUrl: '',
   });
 

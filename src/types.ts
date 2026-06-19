@@ -7,6 +7,8 @@ export interface ProductInfo {
   currentSellingPoints: string;
   channel: 'Takealot' | 'Independent Store' | 'Both';
   targetUser: 'Home User' | 'Small Business' | 'Warehouse/Retail' | 'All';
+  productType: ProductType;
+  businessScenario?: BusinessScenarioKey;
   consumable: boolean;
   relatedProducts: string;
   reviewSamples: string;
@@ -187,7 +189,9 @@ export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
       currentSellingPoints: 'Portable, Thermal, Free Tape',
       channel: 'Both',
       targetUser: 'Small Business',
-      consumable: true,
+      productType: 'Hardware',
+      businessScenario: 'hardwareEntry',
+      consumable: false,
       relatedProducts: 'Series B Labels (50x30mm), Transparent Labels, Cable Labels',
       reviewSamples:
         'Good quality printer for the price. Easy setup. Labels peel off easily. Works well for small business inventory. A bit slow for large batches.',
@@ -206,6 +210,8 @@ export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
       currentSellingPoints: 'Compatible, High Quality, Easy Peel',
       channel: 'Both',
       targetUser: 'Small Business',
+      productType: 'Consumable',
+      businessScenario: 'repeatPurchase',
       consumable: true,
       relatedProducts: 'Niimbot B21, Niimbot B1, Niimbot B3S',
       reviewSamples:
@@ -225,6 +231,8 @@ export const DEMO_PRODUCTS: { name: string; product: ProductInfo }[] = [
       currentSellingPoints: '20000mAh, 65W Fast Charging, Dual Port',
       channel: 'Both',
       targetUser: 'Home User',
+      productType: 'Hardware',
+      businessScenario: 'competitiveElectronics',
       consumable: false,
       relatedProducts: 'USB-C Cable, Phone Case',
       reviewSamples:
