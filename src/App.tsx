@@ -593,7 +593,7 @@ function InputPanel({
             })}
             className="w-full bg-[#0f0f0f] border border-[#2a2a2a] rounded-lg px-3 py-2.5 text-sm text-[#e5e5e5] focus:border-orange-500 transition-colors"
           >
-            <option value="">{t('scanner', 'manualCard', 'businessScenarioPlaceholder')}</option>
+            <option value="">{t('scanner', 'manualCard', 'fields', 'businessScenarioPlaceholder')}</option>
             {BUSINESS_SCENARIOS.map((scenario) => (
               <option key={scenario} value={scenario}>
                 {t('scanner', 'manualCard', 'businessScenarios', scenario)}
@@ -601,7 +601,7 @@ function InputPanel({
             ))}
           </select>
           <p className="text-[10px] text-[#525252] leading-relaxed">
-            {t('scanner', 'manualCard', 'businessScenarioHint')}
+            {t('scanner', 'manualCard', 'fields', 'businessScenarioHint')}
           </p>
         </div>
 
