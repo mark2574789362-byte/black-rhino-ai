@@ -11,8 +11,8 @@ export const I18N = {
   header: {
     title: { zh: 'Black Rhino AI 商品运营诊断助手', en: 'Black Rhino AI Product Operations Assistant' },
     subtitle: { zh: '商品运营诊断助手 · 基于 AI 工作流', en: 'Product Operations Assistant · Powered by AI Workflow' },
-    showPrompt: { zh: '查看提示词模板', en: 'Show Prompt Template' },
-    hidePrompt: { zh: '隐藏提示词模板', en: 'Hide Prompt Template' },
+    showPrompt: { zh: '查看 AI 诊断规则', en: 'View AI Guardrails' },
+    hidePrompt: { zh: '隐藏 AI 诊断规则', en: 'Hide AI Guardrails' },
   },
 
   // ============ Disclaimer Banner ============
@@ -123,7 +123,7 @@ export const I18N = {
 
   // ============ Prompt preview ============
   promptPreview: {
-    title: { zh: '标准化 AI 提示词 — 每次诊断时发送给 MiniMax API', en: 'Standardized AI Prompt — sent to MiniMax API on each diagnosis' },
+    title: { zh: 'AI 诊断规则 — 约束 AI 只基于可用信息做判断', en: 'AI Guardrails — constrain diagnosis to available product data' },
   },
 
   // ============ Business Value Card (业务领导视角) ============
