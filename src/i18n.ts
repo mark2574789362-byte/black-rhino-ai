@@ -190,17 +190,17 @@ export const I18N = {
     },
     entry: {
       demo: {
-        title: { zh: '加载业务场景', en: 'Load Business Demo' },
+        title: { zh: '加载到优先级看板', en: 'Load to Priority Board' },
         desc: {
-          zh: '快速体验业务场景，一键加载进扫描器。',
-          en: 'Try a real business scenario in one click.',
+          zh: '先加载业务场景到 Priority Board，查看优先级后可点击 Run Full Diagnosis 进入 AI 深度诊断。',
+          en: 'Load a business scenario into the Priority Board first, then click Run Full Diagnosis for AI-powered deep analysis.',
         },
       },
       upload: {
         title: { zh: '上传 SKU 文件', en: 'Upload SKU File' },
         desc: {
-          zh: '当前版本支持 CSV 上传，Excel 模板可另存为 CSV 后导入。',
-          en: 'Currently supports CSV. Excel template can be saved as CSV before upload.',
+          zh: '当前版本支持 CSV 上传，Excel 文件请另存为 CSV 后导入。',
+          en: 'Currently supports CSV. Excel files should be saved as CSV before upload.',
         },
       },
       manual: {
@@ -214,8 +214,8 @@ export const I18N = {
     uploadCard: {
       title: { zh: '上传 SKU 文件', en: 'Upload SKU File' },
       hint: {
-        zh: '当前版本支持 CSV 上传，Excel 模板可另存为 CSV 后导入。',
-        en: 'Currently supports CSV. Excel template can be saved as CSV before upload.',
+        zh: '当前版本支持 CSV 上传，Excel 文件请另存为 CSV 后导入。',
+        en: 'Currently supports CSV. Excel files should be saved as CSV before upload.',
       },
       downloadTemplate: { zh: '下载模板', en: 'Download Template' },
       uploadCsv: { zh: '上传 CSV', en: 'Upload CSV' },

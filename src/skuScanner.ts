@@ -13,7 +13,7 @@
 import type {
   BatchSkuInput, SkuScanResult, ProductInfo,
   RuleKey, IssueKey, OpportunityKey, ActionKey,
-  ProductType, BusinessScenarioKey,
+  ProductType, BusinessScenarioKey, Priority,
 } from './types';
 
 // 字段匹配工具：大小写不敏感 + 包含关系
@@ -34,15 +34,16 @@ export interface ScanRulesOptions {
 
 /**
  * 显式经营场景映射（如果用户在 businessScenario 里选了，直接采纳）
+ * risk：信息完整时使用场景默认 risk；信息不完整时降级为 informationIncomplete
  * 仅在 productType 与关键词推断不一致时作为辅助
  */
 const EXPLICIT_SCENARIO_TO_RESULT: Record<BusinessScenarioKey, Partial<SkuScanResult>> = {
-  hardwareEntry:         { role: 'hardwareEntry',         opportunity: 'consumableAttach',       priority: 'A', nextAction: 'runFullDiagnosis',       rule: 'hardwareAttach' },
-  repeatPurchase:        { role: 'repeatPurchase',        opportunity: 'ltvGrowth',              priority: 'A', nextAction: 'buildBundlePlan',        rule: 'consumable' },
-  competitiveElectronics:{ role: 'competitiveElectronics',opportunity: 'scenarioDifferentiation',priority: 'B', nextAction: 'improveSellingPoints',   rule: 'competitive3C' },
-  b2bSolution:           { role: 'b2bEquipment',          opportunity: 'b2bScenario',            priority: 'B', nextAction: 'runFullDiagnosis',       rule: 'b2b' },
-  highTicketDurable:     { role: 'highTicketDurable',     opportunity: 'trustServiceAssurance',  priority: 'B', nextAction: 'runFullDiagnosis',       rule: 'appliance' },
-  generic:               { role: 'generic',               opportunity: 'toBeConfirmed',          priority: 'C', nextAction: 'completeProductCard',    rule: 'generic' },
+  hardwareEntry:          { role: 'hardwareEntry',          opportunity: 'consumableAttach',        priority: 'A', nextAction: 'runFullDiagnosis',     risk: 'useCaseMessagingWeak',     rule: 'hardwareAttach' },
+  repeatPurchase:         { role: 'repeatPurchase',         opportunity: 'ltvGrowth',               priority: 'A', nextAction: 'buildBundlePlan',      risk: 'compatibilityScope',       rule: 'consumable' },
+  competitiveElectronics: { role: 'competitiveElectronics', opportunity: 'scenarioDifferentiation', priority: 'B', nextAction: 'improveSellingPoints', risk: 'priceCompetition',         rule: 'competitive3C' },
+  b2bSolution:            { role: 'b2bEquipment',           opportunity: 'b2bScenario',             priority: 'B', nextAction: 'runFullDiagnosis',     risk: 'compatibilityUnclear',     rule: 'b2b' },
+  highTicketDurable:      { role: 'highTicketDurable',      opportunity: 'trustServiceAssurance',   priority: 'B', nextAction: 'runFullDiagnosis',     risk: 'warrantyDeliveryUnclear',  rule: 'appliance' },
+  generic:                { role: 'generic',                opportunity: 'toBeConfirmed',           priority: 'C', nextAction: 'completeProductCard',  risk: 'noRoleDetected',           rule: 'generic' },
 };
 
 /**
@@ -69,10 +70,11 @@ export function scanSku(sku: BatchSkuInput, _opts: ScanRulesOptions = {}): SkuSc
         sku,
         role: explicit.role!,
         opportunity: explicit.opportunity!,
-        // 风险仍然根据信息完整度判断（用户选了 scenario 不代表信息齐）
-        risk: missing.length
+        // 信息完整时采用场景默认 risk；缺失时降级为 informationIncomplete
+        // （用户选了 scenario 不代表 Listing 信息齐全）
+        risk: (missing.length
           ? ('informationIncomplete' as IssueKey)
-          : ('noRoleDetected' as IssueKey),
+          : explicit.risk!) as IssueKey,
         priority: explicit.priority!,
         nextAction: explicit.nextAction!,
         rule: explicit.rule!,
@@ -227,9 +229,13 @@ export function scanSku(sku: BatchSkuInput, _opts: ScanRulesOptions = {}): SkuSc
   };
 }
 
-/** 批量扫描 */
+/** 批量扫描 · 按 Priority A > B > C 排序，提升优先级面板的“优先”感 */
+const PRIORITY_ORDER: Record<Priority, number> = { A: 0, B: 1, C: 2 };
+
 export function scanSkus(skus: BatchSkuInput[], opts?: ScanRulesOptions): SkuScanResult[] {
-  return skus.map(s => scanSku(s, opts));
+  return skus
+    .map(s => scanSku(s, opts))
+    .sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
 }
 
 // =============================================================================
@@ -349,12 +355,16 @@ export function triggerTemplateDownload(getTemplate: () => string) {
 // =============================================================================
 
 export function batchToProduct(sku: BatchSkuInput): ProductInfo {
+  // 转入单 SKU 诊断时，把 productType + businessScenario 拼进 description，
+  // 避免 AI 只从 category / description 猜不到完整业务类型。
+  const typeTag = `[Product Type: ${sku.productType}; Scenario: ${sku.businessScenario || 'auto'}]`;
+  const baseDesc = sku.description ?? '';
   return {
     productName: sku.productName,
     brand: sku.brand,
     category: sku.category,
     price: sku.price ?? '',
-    description: sku.description ?? '',
+    description: baseDesc ? `${typeTag} ${baseDesc}` : typeTag,
     currentSellingPoints: sku.currentSellingPoints ?? '',
     channel: 'Both',
     targetUser: 'All',
