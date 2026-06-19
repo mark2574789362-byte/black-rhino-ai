@@ -177,7 +177,7 @@ export const I18N = {
       },
       chips: {
         csv: { zh: 'CSV 导入', en: 'CSV Import' },
-        ruleScan: { zh: '规则优先级扫描', en: 'Rule-based Priority Scan' },
+        ruleScan: { zh: '规则初筛', en: 'Rule-based Screening' },
         aiDiagnosis: { zh: 'AI 单品诊断', en: 'AI Single-SKU Diagnosis' },
       },
     },
@@ -200,8 +200,8 @@ export const I18N = {
       upload: {
         title: { zh: '上传 SKU 文件', en: 'Upload SKU File' },
         desc: {
-          zh: '当前版本支持 CSV 上传，Excel 文件请另存为 CSV 后导入。',
-          en: 'Currently supports CSV. Excel files should be saved as CSV before upload.',
+          zh: '当前版本支持标准 CSV 模板导入，复杂 Excel 文件请先另存为 CSV。',
+          en: 'Currently supports standard CSV template import. Complex Excel files should be saved as CSV first.'
         },
       },
       manual: {
@@ -215,8 +215,8 @@ export const I18N = {
     uploadCard: {
       title: { zh: '上传 SKU 文件', en: 'Upload SKU File' },
       hint: {
-        zh: '当前版本支持 CSV 上传，Excel 文件请另存为 CSV 后导入。',
-        en: 'Currently supports CSV. Excel files should be saved as CSV before upload.',
+        zh: '当前版本支持标准 CSV 模板导入，复杂 Excel 文件请先另存为 CSV。',
+        en: 'Currently supports standard CSV template import. Complex Excel files should be saved as CSV first.'
       },
       downloadTemplate: { zh: '下载模板', en: 'Download Template' },
       uploadCsv: { zh: '上传 CSV', en: 'Upload CSV' },
@@ -337,6 +337,10 @@ export const I18N = {
     },
     board: {
       title: { zh: 'SKU 优先级面板', en: 'SKU Priority Board' },
+      boundaryNote: {
+        zh: '当前优先级为业务启发式初筛：基于商品类型、类目、关联商品和经营场景，不代表真实 SKU ABC 分类、利润优先级、库存预警或广告投放决策。',
+        en: 'Current priority is heuristic screening based on product type, category, related products and business scenario. It is not real SKU ABC classification, profit priority, inventory alert, or ad decisioning.',
+      },
       empty: {
         zh: '尚未扫描。请上传 CSV、粘贴记录或加载一个业务场景。',
         en: 'No SKUs scanned yet. Upload a CSV, paste records, or load a scenario.',

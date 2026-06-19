@@ -836,12 +836,12 @@ export default function App() {
 Context:
 - The user first scans SKUs in the SKU Priority Board.
 - When the user clicks Run Full Diagnosis on one SKU, provide a deeper AI-powered diagnosis for that selected SKU.
-- Treat Product Type and Business Scenario as business context, not as final truth if supporting data is missing.
-
 Important rules:
 - Do NOT make conclusions about sales performance, profit margin, inventory turnover, ad ROI, or real SKU classification unless backend data is provided.
 - Do NOT invent sales, margin, inventory, CRM, or advertising data.
+- Treat Product Type and Business Scenario as business context, not as final truth if supporting sales/inventory/margin data is missing.
 - If the provided product information is insufficient, clearly state what cannot be analyzed.
+- The Priority Board is heuristic screening based on product type, category, related products, and business scenario — not real SKU ABC classification, profit priority, inventory alert, or ad decisioning.
 - Focus on listing improvement, positioning, bundle opportunities, SEO/content ideas, and what data should be collected next.
 - Return valid JSON only. No markdown.
 

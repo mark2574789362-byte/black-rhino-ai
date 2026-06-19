@@ -376,6 +376,9 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
             </span>
           )}
         </div>
+        <div className="px-4 py-2 border-b border-[#1f1f1f] text-[11px] leading-relaxed text-[#737373] bg-[#111111]">
+          {t('scanner', 'board', 'boundaryNote')}
+        </div>
 
         {results.length === 0 ? (
           <div className="px-4 py-10 text-center text-xs text-[#525252]">

@@ -184,6 +184,7 @@ CRITICAL LANGUAGE RULE:
 
 Important rules:
 - Do NOT make conclusions about sales performance, profit margin, inventory turnover, ad ROI, or real SKU classification unless backend data is provided.
+- Treat Product Type and Business Scenario as business context, not as final truth if supporting sales/inventory/margin data is missing.
 - If the provided product information is insufficient, clearly state what cannot be analyzed and what additional data is needed.
 - Return valid JSON only. No markdown, no extra text.
 
@@ -194,6 +195,8 @@ Product Information:
 Product Name: ${info.productName || 'N/A'}
 Brand: ${info.brand || 'N/A'}
 Category: ${info.category || 'N/A'}
+Product Type: ${info.productType || 'N/A'}
+Business Scenario: ${info.businessScenario || 'N/A'}
 Price: ${info.price || 'N/A'}
 Description: ${info.description || 'N/A'}
 Current Selling Points: ${info.currentSellingPoints || 'N/A'}
