@@ -190,7 +190,7 @@ export const I18N = {
     },
     entry: {
       demo: {
-        title: { zh: '加载到优先级看板', en: 'Load to Priority Board' },
+        title: { zh: '载入优先级看板', en: 'Load into Priority Board' },
         desc: {
           zh: '先加载业务场景到 Priority Board，查看优先级后可点击 Run Full Diagnosis 进入 AI 深度诊断。',
           en: 'Load a business scenario into the Priority Board first, then click Run Full Diagnosis for AI-powered deep analysis.',
