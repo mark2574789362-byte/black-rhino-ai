@@ -15,6 +15,44 @@ const TARGET_USERS: Array<ProductInfo['targetUser']> = ['Home User', 'Small Busi
 
 const getConsumableFromProductType = (productType: ProductType) => productType === 'Consumable';
 
+const ANALYSIS_DIMENSION_ZH: Record<string, string> = {
+  'Product positioning and target user segments': '商品定位与目标用户画像',
+  'Listing optimization direction': 'Listing 优化方向',
+  'Bundle opportunity for B2B buyers': '面向 B2B 买家的捆绑销售机会',
+  'Real sales velocity and turnover rate': '真实销售速度与库存周转率',
+  'Profit margin per SKU': '单 SKU 毛利率',
+  'Customer repurchase rate': '客户复购率',
+
+  'Repeat purchase potential and LTV': '复购潜力与客户生命周期价值',
+  'Bundle opportunity with compatible hardware': '与兼容硬件的套餐机会',
+  'SEO keyword and content direction': 'SEO 关键词与内容方向',
+  'Actual repurchase rate from CRM data': 'CRM 中的真实复购率',
+  'Inventory turnover days': '库存周转天数',
+  'Customer acquisition cost per channel': '各渠道获客成本',
+
+  'Product positioning vs competitors': '商品定位与竞品对比',
+  'Scene-based selling point opportunities': '场景化卖点机会',
+  'Cross-sell and upsell potential': '交叉销售与升级销售潜力',
+  'Real market share vs Anker and other competitors': '相对 Anker 等竞品的真实市场份额',
+  'Actual conversion rate by traffic source': '各流量来源的真实转化率',
+  'Customer demographic breakdown': '客户人群结构数据',
+
+  'Product positioning for small business and home users': '面向小型商家与个人用户的商品定位',
+  'Listing optimization direction (title, bullet points)': 'Listing 优化方向（标题、要点）',
+  'Bundle and accessory cross-sell opportunity': '套餐与配件交叉销售机会',
+  'Real click-through rate and conversion rate': '真实点击率与转化率',
+  'Customer purchase journey and drop-off points': '客户购买路径与流失节点',
+  'Inventory turnover and stockout frequency': '库存周转与缺货频率',
+
+  'Monthly sales velocity per SKU': '各 SKU 月销售速度',
+  'Gross margin per product line': '各产品线毛利率',
+  'Category sales rank vs competitors': '相对竞品的类目销售排名',
+};
+
+const translateAnalysisDimension = (item: string, lang: Lang) => (
+  lang === 'zh' ? (ANALYSIS_DIMENSION_ZH[item] ?? item) : item
+);
+
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
   const { t } = useLang();
@@ -39,7 +77,7 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
   canAnalyze: string[];
   cannotAnalyze: string[];
 }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const scoreColor = score >= 70 ? '#22c55e' : score >= 40 ? '#eab308' : '#ef4444';
   return (
     <div className="border border-[#2a2a2a] rounded-xl overflow-hidden bg-[#141414]">
@@ -86,7 +124,7 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
               {canAnalyze.map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5 text-xs text-[#a3a3a3]">
                   <span className="text-green-500 mt-0.5">•</span>
-                  {item}
+                  {translateAnalysisDimension(item, lang)}
                 </li>
               ))}
             </ul>
@@ -97,7 +135,7 @@ function DataSufficiencyCard({ score, canAnalyze, cannotAnalyze }: {
               {cannotAnalyze.map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5 text-xs text-[#a3a3a3]">
                   <span className="text-red-500 mt-0.5">•</span>
-                  {item}
+                  {translateAnalysisDimension(item, lang)}
                 </li>
               ))}
             </ul>
@@ -136,7 +174,7 @@ function BusinessValueCard() {
 }
 
 function OutputSection({ output }: { output: AIOutput }) {
-  const { t, tr } = useLang();
+  const { t, tr, lang } = useLang();
   // 信息不足报告：只渲染提示卡片，不渲染后续模块
   if (output.status === 'insufficient') {
     return (
@@ -175,7 +213,7 @@ function OutputSection({ output }: { output: AIOutput }) {
               {output.dataNeeded.map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-xs text-[#a3a3a3]">
                   <span className="text-amber-500/70 flex-shrink-0">•</span>
-                  {item}
+                  {translateAnalysisDimension(item, lang)}
                 </li>
               ))}
             </ul>
