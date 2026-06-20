@@ -341,6 +341,31 @@ export const I18N = {
         zh: '当前优先级为业务启发式初筛：基于商品类型、类目、关联商品和经营场景，不代表真实 SKU ABC 分类、利润优先级、库存预警或广告投放决策。',
         en: 'Current priority is heuristic screening based on product type, category, related products and business scenario. It is not real SKU ABC classification, profit priority, inventory alert, or ad decisioning.',
       },
+      priorityLegend: {
+        title: { zh: '优先级说明', en: 'Priority Legend' },
+        a: { zh: 'A：复购 / 耗材带动 / 硬件入口价值', en: 'A: Repeat-purchase / consumable attach / hardware entry value' },
+        b: { zh: 'B：有优化空间，适合进一步诊断', en: 'B: Optimization opportunity, worth further diagnosis' },
+        c: { zh: 'C：信息不足或经营角色暂不明确', en: 'C: More information needed or role unclear' },
+      },
+      logic: {
+        show: { zh: '展开 Priority Logic', en: 'Show Priority Logic' },
+        hide: { zh: '收起 Priority Logic', en: 'Hide Priority Logic' },
+        aTitle: { zh: 'A Priority', en: 'A Priority' },
+        aDesc: {
+          zh: '优先识别具备复购、耗材带动或硬件入口价值的 SKU，例如耗材类商品、可带动耗材复购的硬件设备。',
+          en: 'Prioritizes SKUs with repeat-purchase, consumable attach, or hardware-entry value, such as consumables and hardware that can drive consumable repurchase.',
+        },
+        bTitle: { zh: 'B Priority', en: 'B Priority' },
+        bDesc: {
+          zh: '识别有优化空间但需要进一步诊断的 SKU，例如 3C 同质化竞争商品、B2B 设备、家具家居、大家电等。',
+          en: 'Identifies SKUs with optimization opportunities that need further diagnosis, such as competitive 3C products, B2B equipment, furniture/home-office items, and appliances.',
+        },
+        cTitle: { zh: 'C Priority', en: 'C Priority' },
+        cDesc: {
+          zh: '用于标记信息不足或经营角色暂不明确的 SKU，建议先补充类目、卖点、描述和关联商品信息。',
+          en: 'Marks SKUs with insufficient information or unclear business role. Complete category, selling points, description, and related products first.',
+        },
+      },
       empty: {
         zh: '尚未扫描。请上传 CSV、粘贴记录或加载一个业务场景。',
         en: 'No SKUs scanned yet. Upload a CSV, paste records, or load a scenario.',

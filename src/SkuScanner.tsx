@@ -54,6 +54,8 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
   const [pendingSkus, setPendingSkus] = useState<BatchSkuInput[]>([]);
   // 选填区折叠
   const [showAdvanced, setShowAdvanced] = useState(false);
+  // Priority Board 规则说明折叠
+  const [showPriorityLogic, setShowPriorityLogic] = useState(false);
 
   // 扫描结果
   const [results, setResults] = useState<SkuScanResult[]>([]);
@@ -378,6 +380,69 @@ export default function SkuScanner({ onSelectForDiagnosis }: Props) {
         </div>
         <div className="px-4 py-2 border-b border-[#1f1f1f] text-[11px] leading-relaxed text-[#737373] bg-[#111111]">
           {t('scanner', 'board', 'boundaryNote')}
+        </div>
+        <div className="px-4 py-3 border-b border-[#1f1f1f] bg-[#111111] space-y-3">
+          <div className="flex flex-col lg:flex-row lg:items-center gap-2 lg:gap-3">
+            <span className="text-[11px] font-medium text-[#a3a3a3]">
+              {t('scanner', 'board', 'priorityLegend', 'title')}
+            </span>
+            <div className="flex flex-wrap gap-2">
+              <span className={`inline-flex items-center text-[10px] px-2 py-1 rounded border ${priorityColor('A')}`}>
+                {t('scanner', 'board', 'priorityLegend', 'a')}
+              </span>
+              <span className={`inline-flex items-center text-[10px] px-2 py-1 rounded border ${priorityColor('B')}`}>
+                {t('scanner', 'board', 'priorityLegend', 'b')}
+              </span>
+              <span className={`inline-flex items-center text-[10px] px-2 py-1 rounded border ${priorityColor('C')}`}>
+                {t('scanner', 'board', 'priorityLegend', 'c')}
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowPriorityLogic(v => !v)}
+              className="lg:ml-auto inline-flex items-center gap-1.5 text-[11px] text-orange-500 hover:text-orange-400 transition-colors self-start lg:self-auto"
+            >
+              {showPriorityLogic ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+              {t('scanner', 'board', 'logic', showPriorityLogic ? 'hide' : 'show')}
+            </button>
+          </div>
+          <AnimatePresence initial={false}>
+            {showPriorityLogic && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="grid md:grid-cols-3 gap-3 pt-1">
+                  <div className="rounded-lg border border-orange-500/20 bg-orange-500/5 p-3">
+                    <div className="text-[11px] font-semibold text-orange-500 mb-1">
+                      {t('scanner', 'board', 'logic', 'aTitle')}
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-[#a3a3a3]">
+                      {t('scanner', 'board', 'logic', 'aDesc')}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-3">
+                    <div className="text-[11px] font-semibold text-amber-500 mb-1">
+                      {t('scanner', 'board', 'logic', 'bTitle')}
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-[#a3a3a3]">
+                      {t('scanner', 'board', 'logic', 'bDesc')}
+                    </p>
+                  </div>
+                  <div className="rounded-lg border border-[#3a3a3a] bg-[#181818] p-3">
+                    <div className="text-[11px] font-semibold text-[#d4d4d4] mb-1">
+                      {t('scanner', 'board', 'logic', 'cTitle')}
+                    </div>
+                    <p className="text-[11px] leading-relaxed text-[#a3a3a3]">
+                      {t('scanner', 'board', 'logic', 'cDesc')}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {results.length === 0 ? (
