@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
+    "eval:golden": "tsc -p tsconfig.eval.json && node -e \"require('fs').writeFileSync('.eval-build/package.json', '{\\\"type\\\":\\\"commonjs\\\"}')\" && node .eval-build/evaluateGoldenSkus.js",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -18,6 +19,7 @@
   "devDependencies": {
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
+    "@types/node": "^22.10.2",
     "typescript": "^5.7.2"
   }
 }

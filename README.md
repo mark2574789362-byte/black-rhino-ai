@@ -99,6 +99,27 @@ http://127.0.0.1:5173/
 npm run build
 ```
 
+## Golden SKU Evaluation
+
+The repository includes 10 Golden SKU cases for repeatable output-quality checks.
+
+Run:
+
+```bash
+npm run eval:golden
+```
+
+The evaluator scores each SKU on a 100-point rubric:
+
+- data boundary compliance: 30
+- product positioning: 20
+- listing specificity: 20
+- bundle executability: 15
+- SEO scenario fit: 10
+- professional tone: 5
+
+Cases below 80 points fail the evaluation.
+
 ## Future Upgrade
 
 After backend access, this demo can be upgraded into a real SKU operations decision system with:
